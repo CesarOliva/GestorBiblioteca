@@ -2,6 +2,7 @@ package Conexion;
 
 //Importa las librerias necesarias
 import java.sql.*;
+import java.time.LocalDate;
 import biblioteca.App;
 import biblioteca.LibroIndividual;
 
@@ -13,7 +14,11 @@ import elementos.WindowError;
 public class Peticiones {
     //Conexion a la base de datos
     private static Conexion conectar = Conexion.getInstance();
-    
+    //Fecha actual
+    private static LocalDate fecha = LocalDate.now();
+
+    private static int IdAutor, IdGenero;
+
     //Agregar usuario
     public static boolean agregarUsuario(String nombre, String usuario, String contraseña){
         try{
@@ -37,13 +42,15 @@ public class Peticiones {
                     String[] admin = usuario.split("admin:");
 
                     //Insertar elementos a la base de datos de socios}
-                    PreparedStatement insertar = conexion.prepareStatement("insert into administradores values(?,?,?,?)"); //Los cuatro atributos de la tabla
+                    PreparedStatement insertar = conexion.prepareStatement("insert into administradores values(?,?,?,?,?,?)"); //Los seis atributos de la tabla
 
                     //Pasa los valores
                     insertar.setString(1, "0");
                     insertar.setString(2, nombre);
                     insertar.setString(3, admin[1]);
                     insertar.setString(4, contraseña);
+                    insertar.setDate(5, java.sql.Date.valueOf(fecha));
+                    insertar.setString(6, "C:/xampp/htdocs/Imagenes/Usuario.jpg");
 
                     //Ejecuta los cambios
                     insertar.executeUpdate();
@@ -61,13 +68,15 @@ public class Peticiones {
                     return true;
                 }else{ //Si es socio                     
                     //Insertar elementos a la base de datos de socios
-                    PreparedStatement insertar = conexion.prepareStatement("insert into socios values(?,?,?,?)"); //Los cuatro atributos de la tabla
+                    PreparedStatement insertar = conexion.prepareStatement("insert into socios values(?,?,?,?,?,?)"); //Los seis atributos de la tabla
 
                     //Pasa los valores
                     insertar.setString(1, "0");
                     insertar.setString(2, nombre);
                     insertar.setString(3, usuario);
                     insertar.setString(4, contraseña);
+                    insertar.setDate(5, java.sql.Date.valueOf(fecha));                    
+                    insertar.setString(6, "C:/xampp/htdocs/Imagenes/Usuario.jpg");
 
                     //Ejecuta los cambios
                     insertar.executeUpdate();
@@ -139,6 +148,53 @@ public class Peticiones {
             //Inicia la conexion
             Connection conexion = conectar.conectar();
 
+            //Busca si ya existe el autor y el genero
+            PreparedStatement buscarAutor = conexion.prepareStatement("select IdAutor FROM autores WHERE Nombre= ?");
+            PreparedStatement buscarGenero = conexion.prepareStatement("select IdGenero FROM generos WHERE Genero= ?");
+            buscarAutor.setString(1, autor);
+            buscarGenero.setString(1, genero);
+            
+            ResultSet consultaAutor = buscarAutor.executeQuery();
+            ResultSet consultaGenero = buscarGenero.executeQuery();
+            
+            //Busca si existe el autor, sino, lo crea
+            if(consultaAutor.next()){ //Si lo encuentra en la tabla de autores
+                IdAutor = consultaAutor.getInt("IdAutor");
+            }else{ //Si no existe en la tabla
+                PreparedStatement insertarAutor = conexion.prepareStatement("insert into autores values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS); //Crea un registro del autor
+                
+                //Pasa los valores
+                insertarAutor.setString(1, "0");
+                insertarAutor.setString(2, autor);
+                insertarAutor.setString(3, "Sobre el autor");
+                insertarAutor.setString(4, "C:/xampp/htdocs/Imagenes/Usuario.jpg");
+                
+                insertarAutor.executeUpdate();
+                
+                //Obtiene el id del autor
+                ResultSet id = insertarAutor.getGeneratedKeys();
+                id.next();
+                IdAutor = id.getInt(1);
+            }
+            
+            //Busca si existe el genero, sino, lo crea
+            if(consultaGenero.next()){ //Si lo encuentra en la tabla de generos
+                IdGenero = consultaGenero.getInt("IdGenero");
+            }else{ //Si no existe en la tabla
+                PreparedStatement insertarGenero = conexion.prepareStatement("insert into generos values (?,?)", Statement.RETURN_GENERATED_KEYS); //Crea un registro del genero
+                
+                //Pasa los valores
+                insertarGenero.setString(1, "0");
+                insertarGenero.setString(2, genero);
+                
+                insertarGenero.executeUpdate();
+                
+                //Obtiene el id del genero
+                ResultSet id = insertarGenero.getGeneratedKeys();
+                id.next();
+                IdGenero = id.getInt(1);
+            }
+            
             //Inserta elementos a la base de datos de libros
             PreparedStatement insertar = conexion.prepareStatement("insert into libros values (?,?,?,?,?,?,?,?,?,?)");
             
@@ -146,11 +202,11 @@ public class Peticiones {
             insertar.setString(1, "0");
             insertar.setString(2, isbn);
             insertar.setString(3, titulo);
-            insertar.setString(4, autor);
+            insertar.setInt(4, IdAutor);
             insertar.setString(5, portada);
             insertar.setInt(6, año);
             insertar.setString(7, editorial);
-            insertar.setString(8, genero);
+            insertar.setInt(8, IdGenero);
             insertar.setInt(9, paginas);
             insertar.setString(10, descripcion);
 
@@ -159,6 +215,9 @@ public class Peticiones {
 
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
+            
+            //Limpia los campos
+            biblioteca.CRUD_Libro.getInstancia().limpiarCampos();
 
             new WindowMessage("Libro Agregado Exitosamente");
         }catch(Exception error){

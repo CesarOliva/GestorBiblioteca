@@ -54,4 +54,11 @@ public class PlaceholderTextField extends JTextField {
     public void resetPlaceholder() {
         setForeground(Color.black);
     }
+    
+    // Vuelve a poner el texto del placeholder
+    public void clear() {
+        setText(placeholder);
+        setForeground(placeholderColor);
+    }
+
 }

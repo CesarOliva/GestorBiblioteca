@@ -24,11 +24,14 @@ public class CRUD_Libro extends JPanel{
     private JScrollPane scroll;
     private int año, paginas;
     private String rutaWeb;
+    private static CRUD_Libro instancia;
     
     public CRUD_Libro(){
         //Configuracion del panel
         setLayout(null);
         setBackground(Color.white);
+        
+        instancia = this;
 
         //Creación de los elementos       
         ruta = new ImageIcon(getClass().getResource("/imagenes/addCover.png"));
@@ -85,7 +88,7 @@ public class CRUD_Libro extends JPanel{
         Descripcion.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                Descripcion.setBorder(null);
+                scroll.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
             }       
         }); 
         
@@ -181,7 +184,7 @@ public class CRUD_Libro extends JPanel{
         if(!correcto) return;
         
         //Verifica que tenga portada
-        if(rutaWeb==null){
+        if(rutaWeb==null || rutaWeb==""){
             new WindowError("Selecciona una imagen");
             correcto = false;
         }
@@ -189,15 +192,6 @@ public class CRUD_Libro extends JPanel{
         if(correcto){
             Peticiones.agregarLibro(isbn, titulo, autor, portada, año, editorial, genero, paginas, descripcion);
         }
-    }
-    
-    private void resetPlaceholder(PlaceholderTextField tf){
-        tf.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                ((PlaceholderTextField)tf).resetPlaceholder();
-            }       
-        });        
     }
     
     private void chooseFile(){
@@ -216,7 +210,7 @@ public class CRUD_Libro extends JPanel{
             File archivoSeleccionado = fileChooser.getSelectedFile();
             
             //Ruta donde se guardará la imagen
-            String destinoPath = "C:/xampp/htdocs/Portadas/"+Titulo.getText().replace(" ", "")+".jpg";
+            String destinoPath = "C:/xampp/htdocs/Imagenes/"+Titulo.getText().replace(" ", "")+".jpg";
             File destino = new File(destinoPath);
             
             try{
@@ -232,5 +226,34 @@ public class CRUD_Libro extends JPanel{
             Portada.setIcon(new ImageIcon(imagen));
             repaint();
         }
+    }
+    
+    private void resetPlaceholder(PlaceholderTextField tf){
+        tf.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                ((PlaceholderTextField)tf).resetPlaceholder();
+            }       
+        });        
+    }    
+    
+    public void limpiarCampos(){
+        ruta = new ImageIcon(getClass().getResource("/imagenes/addCover.png"));
+        Image imagen = ruta.getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
+        Portada.setIcon(new ImageIcon(imagen));
+        rutaWeb = "";
+        
+        Titulo.clear();
+        Autor.clear();
+        ISBN.clear();
+        Editorial.clear();
+        Año.clear();
+        Genero.clear();
+        Paginas.clear();
+        Descripcion.setText("");
+    }
+    
+    public static CRUD_Libro getInstancia(){
+        return instancia;
     }
 }
