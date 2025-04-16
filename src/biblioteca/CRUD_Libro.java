@@ -215,7 +215,7 @@ public class CRUD_Libro extends JPanel{
             
             try{
                 Files.copy(archivoSeleccionado.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                rutaWeb = "http://localhost/Portadas/"+Titulo.getText().replace(" ", "")+".jpg";
+                rutaWeb = "http://localhost/Imagenes/"+Titulo.getText().replace(" ", "")+".jpg";
             }catch(IOException ex){
                 ex.printStackTrace();
                 System.out.println("Error al copiar la imagen");

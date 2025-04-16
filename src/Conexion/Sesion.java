@@ -1,21 +1,43 @@
 package Conexion;
 
+//Se importan las librerias necesarias.
+import java.sql.*;
+
 //Clase que guarda el usuario con la sesión activa
 public class Sesion {
-    private static String usuarioActual;
-    private static String tipoUsuario;
+    //Conexion a la base de datos
+    private static Conexion conectar = Conexion.getInstance();
     
-    public static void iniciarSesion(String usuario, String tipo){
+    private static String usuarioActual;
+    
+    public static void iniciarSesion(String usuario){
         usuarioActual = usuario;
-        tipoUsuario = tipo;
     }
     
     public static String getUsuario(){return usuarioActual;}
     
-    public static String getTipoUsuario(){return tipoUsuario;}
+    public static int getIdUsuario(){
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+            PreparedStatement busqueda = conexion.prepareStatement("select IdUsuario from usuarios where Usuario='"+usuarioActual+"'");
+            
+            ResultSet resultado = busqueda.executeQuery();
+            
+            //Obtiene el id
+            if (resultado.next()) {
+                return resultado.getInt("IdUsuario");
+            } else {
+                return 0;
+            }
+            
+        }catch(Exception error){
+            System.out.println("Error: "+error);
+            return 0;
+        }
+    }
     
     public static void cerrarSesion(){
         usuarioActual = null;
-        tipoUsuario = null;
     }
 }
