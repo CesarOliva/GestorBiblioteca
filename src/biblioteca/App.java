@@ -3,10 +3,7 @@ package biblioteca;
 //Se importan las librerias a usar
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-
-//Librerias personalizadas a utilizar
-import elementos.RoundedButton;
+import Conexion.Sesion;
 
 //Clase App heredada de un JFrame. Frame personalizado
 public class App extends JFrame{
@@ -24,7 +21,7 @@ public class App extends JFrame{
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
         
-        if(tipoUsuario.equals("admin")){
+        if(tipoUsuario.equals("administrador")){
             menu = new MenuAdmin().menu;
         }else{
             menu =new MenuSocio().menu;
@@ -35,14 +32,17 @@ public class App extends JFrame{
         contentPanel.setLayout(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
 
-        //agrega el Dashboard como primer vista a cargar
+        //agrega el Inicio como primer vista a cargar
         contentPanel.add(new CRUD_Libro());
         
-        //Se agregam los paneles al frame y lo hace visible
+        //Se agregan los paneles al frame y lo hace visible
         add(menu, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
         setVisible(true);
-    }
+        
+        System.out.println(Sesion.getIdUsuario()+", "+Sesion.getNombreUsuario()+", "+Sesion.getUsuario());
+        
+}
 
     //Metodo que muestra el panel con el contenido del codigo
     //Cambia el diseño del boton activo
