@@ -10,6 +10,7 @@ import java.util.Locale;
 import net.miginfocom.swing.MigLayout; //Posición de los elementos
 import org.jdesktop.animation.timing.*; //Animaciones
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+
 //peticiones a la base de datos
 import Conexion.Peticiones;
 
@@ -373,6 +374,7 @@ public class LogIn extends JFrame {
         public static Formulario getInstancia(){
             return instancia;
         }
+        
         
         
         //Metodos que validan los datos de los campos del formulario

@@ -15,6 +15,7 @@ public class ejecuter {
             // Establece el LookAndFeel
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (Exception e) {
+            System.out.println("Error"+e);
         }
     }
 }

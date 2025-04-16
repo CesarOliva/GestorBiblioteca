@@ -2,42 +2,75 @@ package Conexion;
 
 //Se importan las librerias necesarias.
 import java.sql.*;
+import elementos.WindowError;
 
 //Clase que guarda el usuario con la sesión activa
 public class Sesion {
     //Conexion a la base de datos
     private static Conexion conectar = Conexion.getInstance();
     
-    private static String usuarioActual;
+    private static int usuarioActual;
     
-    public static void iniciarSesion(String usuario){
-        usuarioActual = usuario;
+    public static void iniciarSesion(int IdUsuario){
+        usuarioActual = IdUsuario;
     }
     
-    public static String getUsuario(){return usuarioActual;}
+    //Obtener los datos del usuario
+    public static int getIdUsuario(){ 
+        return usuarioActual;
+    }
     
-    public static int getIdUsuario(){
+    public static String getNombreUsuario(){
         try{
-            //Inicia la conexion
+            //Inicializa la conexión
             Connection conexion = conectar.conectar();
-            PreparedStatement busqueda = conexion.prepareStatement("select IdUsuario from usuarios where Usuario='"+usuarioActual+"'");
+
+            //Busca el Nombre del usuario
+            PreparedStatement busquedaNombre = conexion.prepareStatement("select Nombre from usuarios where IdUsuario='"+usuarioActual+"'");
+            ResultSet consultaNombre = busquedaNombre.executeQuery();
             
-            ResultSet resultado = busqueda.executeQuery();
-            
-            //Obtiene el id
-            if (resultado.next()) {
-                return resultado.getInt("IdUsuario");
-            } else {
-                return 0;
+            //Si encuentra el id del usuario
+            if(consultaNombre.next()){
+                return consultaNombre.getString("Nombre");
             }
+
+            //Cerrar la conexión
+            conectar.cerrarConexion();
             
-        }catch(Exception error){
-            System.out.println("Error: "+error);
-            return 0;
+            return "";
+        }catch(Exception e){
+            new WindowError("Ha ocurrido un error. Intente nuevamente");
+            System.out.println("Error: "+e);
+            return "";
+        }
+    }
+
+    public static String getUsuario(){
+        try{
+            //Inicializa la conexión
+            Connection conexion = conectar.conectar();
+
+            //Busca el Usuario
+            PreparedStatement busquedaUser = conexion.prepareStatement("select Usuario from usuarios where IdUsuario='"+usuarioActual+"'");
+            ResultSet consultaUser = busquedaUser.executeQuery();
+            
+            //Si encuentra el id del usuario
+            if(consultaUser.next()){
+                return consultaUser.getString("Usuario");
+            }
+
+            //Cerrar la conexión
+            conectar.cerrarConexion();
+            
+            return "";
+        }catch(Exception e){
+            new WindowError("Ha ocurrido un error. Intente nuevamente");
+            System.out.println("Error: "+e);
+            return "";
         }
     }
     
     public static void cerrarSesion(){
-        usuarioActual = null;
+        usuarioActual = 0;
     }
 }

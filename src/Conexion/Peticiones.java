@@ -4,7 +4,6 @@ package Conexion;
 import java.sql.*;
 import java.time.LocalDate;
 import biblioteca.App;
-import biblioteca.LibroIndividual;
 
 //"Librerias" personalizadas a importar
 import elementos.WindowMessage;
@@ -17,7 +16,7 @@ public class Peticiones {
     //Fecha actual
     private static LocalDate fecha = LocalDate.now();
 
-    private static int IdAutor, IdGenero, IdEditorial;
+    private static int IdUsuarioActivo;
 
     
     
@@ -100,18 +99,25 @@ public class Peticiones {
                 
                 if(consultaTipos.next()){
                     String tipo = consultaTipos.getString("TipoUsuario");
-                    System.out.println(tipo);
                     
-                    new App(tipo);
+
                     
                     //Guarda los datos de sesión
-                    Sesion.iniciarSesion(usuario); //Envia el usuario
+                    PreparedStatement busqueda = conexion.prepareStatement("select IdUsuario from usuarios where Usuario='"+usuario+"'");
+
+                    ResultSet resultado = busqueda.executeQuery();
+
+                    //Obtiene el id
+                    if (resultado.next()) {
+                        IdUsuarioActivo = resultado.getInt("IdUsuario");
+                    }
+                    
+                    Sesion.iniciarSesion(IdUsuarioActivo); //Envia el usuario activo
+                    
+                    //Abre la aplicación segun el tipo de usuario que es
+                    new App(tipo);
                 }
-                
-
-
                 biblioteca.LogIn.Formulario.getInstancia().limpiarCampos();
-                new App("socio");
                 biblioteca.LogIn.getInstancia().cerrar();
             }else{ //Si no encuentra el usuario o no coincide la contraseña
                 new WindowError("Usuario o contraseña incorrectos");
@@ -120,6 +126,7 @@ public class Peticiones {
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
         }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");
             System.out.println("Error: "+error);
         }
     }
@@ -146,6 +153,7 @@ public class Peticiones {
             ResultSet consultaGenero = buscarGenero.executeQuery();
             ResultSet consultaEditorial = buscarEditorial.executeQuery();
             
+            int IdAutor;
             //Busca si existe el autor, sino, lo crea
             if(consultaAutor.next()){ //Si lo encuentra en la tabla de autores
                 IdAutor = consultaAutor.getInt("IdAutor");
@@ -166,6 +174,7 @@ public class Peticiones {
                 IdAutor = id.getInt(1);
             }
             
+            int IdGenero;
             //Busca si existe el genero, sino, lo crea
             if(consultaGenero.next()){ //Si lo encuentra en la tabla de generos
                 IdGenero = consultaGenero.getInt("IdGenero");
@@ -184,6 +193,7 @@ public class Peticiones {
                 IdGenero = id.getInt(1);
             }
             
+            int IdEditorial;
             //Busca si existe la editorial, sino, lo crea
             if(consultaEditorial.next()){ //Si lo encuentra en la tabla de autores
                 IdEditorial = consultaAutor.getInt("IdEditorial");
@@ -233,7 +243,7 @@ public class Peticiones {
             PreparedStatement libroAdmin = conexion.prepareStatement("insert into librosadministradores values (?,?,?)");
             //Pasa los valores
             libroAdmin.setInt(1, idLibro);
-            libroAdmin.setInt(2, Sesion.getIdUsuario());
+            libroAdmin.setInt(2, IdUsuarioActivo);
             libroAdmin.setDate(3, java.sql.Date.valueOf(fecha));
             
             //Ejecuta los cambios
@@ -247,67 +257,44 @@ public class Peticiones {
 
             new WindowMessage("Libro Agregado Exitosamente");
         }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");
             System.out.println("Error: "+error);
         }
     }
-    
-    //Obtiene los datos de los usuarios
-    public void obtenerDatosUsuario(String usuario){
-        try{
-            //Inicia la conexión a la base de datoss
-            Connection conexion = conectar.conectar();
-            
-            PreparedStatement consultaUsuario = conexion.prepareStatement("select * from ");
-            
-        }catch(Exception error){
-            System.out.println("Error: "+error);
-        }
-    }
+
+
     
     //Elimina el usuario
-    public void eliminarUsuario(String Usuario) {
+    public void eliminarUsuario(String usuario) {
         try{
             //Inicia la conexion
             Connection conexion = conectar.conectar();
             
-            //Busca en la base de datos de socios y de administradores
-            PreparedStatement busquedaSocios = conexion.prepareStatement("select * from socios where Usuario='"+Usuario+"'");
-            PreparedStatement busquedaAdmins = conexion.prepareStatement("select * from administradores where Usuario='"+Usuario+"'");
-            ResultSet consultaSocios = busquedaSocios.executeQuery();
-            ResultSet consultaAdmins = busquedaAdmins.executeQuery();
+            //Busca en la base de datos de usuarios
+            PreparedStatement busquedaUsuarios = conexion.prepareStatement("select * from usuarios where Usuario='"+usuario+"'");
+            ResultSet consultaUsuarios = busquedaUsuarios.executeQuery();
             
-            //Si encuentra en la base de socios
-            if(consultaSocios.next()){
-                //Elimina el socio
-                PreparedStatement EliminarSocio = conexion.prepareStatement("delete from socios where Usuario='" + Usuario + "'");
+            if(consultaUsuarios.next()){
+                //Elimina el usuario
+                PreparedStatement eliminarUsuario = conexion.prepareStatement("delete from usuarios where Usuario='"+usuario+"'");
 
-                int filasAfectadas = EliminarSocio.executeUpdate();
+                int filasAfectadas = eliminarUsuario.executeUpdate();
+                
                 if (filasAfectadas > 0) {
                     new WindowMessage("Usuario eliminado correctamente.");
                     new biblioteca.LogIn();
                 } else {
-                    System.out.println("No se encontró ningún registro con ese ID.");
-                }
-            }else if(consultaAdmins.next()){
-                PreparedStatement EliminarAdmin = conexion.prepareStatement("delete from admin where Usuario='" + Usuario + "'");
-
-                int filasAfectadas = EliminarAdmin.executeUpdate();
-
-                if (filasAfectadas > 0) {
-                    new WindowMessage("Usuario eliminado correctamente.");
-                    new biblioteca.LogIn();
-                } else {
-                    System.out.println("No se encontró ningún registro con ese ID.");
+                    new WindowError("Usuario referenciado incorrectamente");
                 }
             }else{
-                System.out.println("No se encontró el usuario");
+                new WindowError("Usuario referenciado incorrectamente");
             }
             
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
-            
         }catch(Exception error){
             System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");
         }
     }
 }
