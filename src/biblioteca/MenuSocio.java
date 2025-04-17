@@ -5,6 +5,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import Conexion.Sesion;
+
 //"Librerias" personalizadas a importar
 import elementos.RoundedButton;
 
@@ -52,7 +54,7 @@ public class MenuSocio extends JPanel{
         //Cambio de vista al presionar los botones
         inicio.addActionListener((ActionEvent e) -> {
             //Ejecuta el metodo cambiarVista
-            App.cambiarVista(new CRUD_Libro(), inicio);
+            App.cambiarVista(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getFechaCreacion(), Sesion.getFoto()), inicio);
         });
         busqueda.addActionListener((ActionEvent e) -> {
             //Ejecuta el metodo cambiarVista

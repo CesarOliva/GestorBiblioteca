@@ -1,76 +1,61 @@
 package Conexion;
 
-//Se importan las librerias necesarias.
+//Se importan las librerias necesarias
 import java.sql.*;
 import elementos.WindowError;
 
-//Clase que guarda el usuario con la sesión activa
 public class Sesion {
-    //Conexion a la base de datos
     private static Conexion conectar = Conexion.getInstance();
     
-    private static int usuarioActual;
-    
+    private static int idUsuario;
+    private static String nombre;
+    private static String usuario;
+    private static String Contraseña;
+    private static String fechaCreacion;
+    private static String foto;
+
     public static void iniciarSesion(int IdUsuario){
-        usuarioActual = IdUsuario;
-    }
-    
-    //Obtener los datos del usuario
-    public static int getIdUsuario(){ 
-        return usuarioActual;
-    }
-    
-    public static String getNombreUsuario(){
-        try{
-            //Inicializa la conexión
-            Connection conexion = conectar.conectar();
+        idUsuario = IdUsuario;
 
-            //Busca el Nombre del usuario
-            PreparedStatement busquedaNombre = conexion.prepareStatement("select Nombre from usuarios where IdUsuario='"+usuarioActual+"'");
-            ResultSet consultaNombre = busquedaNombre.executeQuery();
+        try {
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
             
-            //Si encuentra el id del usuario
-            if(consultaNombre.next()){
-                return consultaNombre.getString("Nombre");
+            PreparedStatement busquedaUsuario = conexion.prepareStatement("select Nombre, Usuario, Contraseña, FechaCreacion, Foto from usuarios where IdUsuario='"+idUsuario+"'");
+            ResultSet consultaUsuario = busquedaUsuario.executeQuery();
+
+            if (consultaUsuario.next()) {
+                nombre = consultaUsuario.getString("Nombre");
+                usuario = consultaUsuario.getString("Usuario");
+                Contraseña = consultaUsuario.getString("Contraseña");
+                fechaCreacion = consultaUsuario.getString("FechaCreacion");
+                foto = consultaUsuario.getString("Foto");
             }
 
-            //Cerrar la conexión
             conectar.cerrarConexion();
-            
-            return "";
-        }catch(Exception e){
+        } catch (Exception e) {
             new WindowError("Ha ocurrido un error. Intente nuevamente");
-            System.out.println("Error: "+e);
-            return "";
+            System.out.println("Error al iniciar sesión: " + e);
         }
     }
 
-    public static String getUsuario(){
-        try{
-            //Inicializa la conexión
-            Connection conexion = conectar.conectar();
-
-            //Busca el Usuario
-            PreparedStatement busquedaUser = conexion.prepareStatement("select Usuario from usuarios where IdUsuario='"+usuarioActual+"'");
-            ResultSet consultaUser = busquedaUser.executeQuery();
-            
-            //Si encuentra el id del usuario
-            if(consultaUser.next()){
-                return consultaUser.getString("Usuario");
-            }
-
-            //Cerrar la conexión
-            conectar.cerrarConexion();
-            
-            return "";
-        }catch(Exception e){
-            new WindowError("Ha ocurrido un error. Intente nuevamente");
-            System.out.println("Error: "+e);
-            return "";
-        }
-    }
+    public static int getIdUsuario() { return idUsuario; }
     
+    public static String getNombre() { return nombre; }
+    
+    public static String getUsuario() { return usuario; }
+    
+    public static String getContraseña() { return Contraseña; }
+    
+    public static String getFechaCreacion() { return fechaCreacion; }
+    
+    public static String getFoto() { return foto; }
+
     public static void cerrarSesion(){
-        usuarioActual = 0;
+        idUsuario = 0;
+        nombre = null;
+        usuario = null;
+        fechaCreacion = null;
+        foto = null;
     }
 }

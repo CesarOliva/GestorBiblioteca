@@ -23,7 +23,7 @@ public class CRUD_Libro extends JPanel{
     private JTextArea Descripcion;
     private JScrollPane scroll;
     private int año, paginas;
-    private String rutaWeb;
+    private String rutaNueva;
     private static CRUD_Libro instancia;
     
     public CRUD_Libro(){
@@ -96,7 +96,11 @@ public class CRUD_Libro extends JPanel{
         Portada.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e){
-                chooseFile();
+                if(!Titulo.validarContenido()){
+                    chooseFile();
+                }else{
+                    new WindowError("Llena primero los campos");
+                }
             }
         });
         
@@ -127,7 +131,7 @@ public class CRUD_Libro extends JPanel{
         
         //Valida que todos los elementos estén completos
         if(ISBN.validarContenido()){ISBN.setForeground(Color.red); correcto=false;}
-        if(Titulo.validarContenido()){Titulo.setForeground(Color.red); correcto=false;}
+        if(Titulo.validarContenido()){Titulo.setForeground(Color.red); correcto=false; }
         if(Autor.validarContenido()){Autor.setForeground(Color.red); correcto=false;}
         if(Año.validarContenido()){Año.setForeground(Color.red); correcto=false;}
         if(Editorial.validarContenido()){Editorial.setForeground(Color.red); correcto=false;}
@@ -142,11 +146,11 @@ public class CRUD_Libro extends JPanel{
         String isbn = ISBN.getText().trim();
         String titulo = Titulo.getText().trim();
         String autor = Autor.getText().trim();
-        String portada = rutaWeb;
+        String portada = rutaNueva;
         String editorial = Editorial.getText().trim();
         String genero = Genero.getText().trim();
         String descripcion = Descripcion.getText().trim();
-
+        
         //Verifica si el autor y el genero no tienen numeros
         if(!autor.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")){
             Autor.setForeground(Color.red);
@@ -184,7 +188,7 @@ public class CRUD_Libro extends JPanel{
         if(!correcto) return;
         
         //Verifica que tenga portada
-        if(rutaWeb==null || rutaWeb==""){
+        if(rutaNueva==null || rutaNueva==""){
             new WindowError("Selecciona una imagen");
             correcto = false;
         }
@@ -208,23 +212,29 @@ public class CRUD_Libro extends JPanel{
         if (resultado == JFileChooser.APPROVE_OPTION) {
             //Obtiene el archivo
             File archivoSeleccionado = fileChooser.getSelectedFile();
-            
-            //Ruta donde se guardará la imagen
-            String destinoPath = "C:/xampp/htdocs/Imagenes/"+Titulo.getText().replace(" ", "")+".jpg";
-            File destino = new File(destinoPath);
-            
-            try{
-                Files.copy(archivoSeleccionado.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                rutaWeb = "http://localhost/Imagenes/"+Titulo.getText().replace(" ", "")+".jpg";
-            }catch(IOException ex){
-                ex.printStackTrace();
-                System.out.println("Error al copiar la imagen");
-            }
 
-            //Reemplazar la imagen de selección por la imagen seleccionada
-            Image imagen = new ImageIcon(destinoPath).getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
-            Portada.setIcon(new ImageIcon(imagen));
-            repaint();
+            File Carpeta = new File("C:/xampp/htdocs/Imagenes");
+            
+            //Si no existe la carpeta la crea
+            if(!Carpeta.exists()){
+                Carpeta.mkdirs();
+            }else{
+                //Ruta donde se guardará la imagen
+                rutaNueva = "C:/xampp/htdocs/Imagenes/"+Titulo.getText().replace(" ", "")+".jpg";
+                File destino = new File(rutaNueva);
+
+                try{
+                    Files.copy(archivoSeleccionado.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }catch(IOException ex){
+                    ex.printStackTrace();
+                    System.out.println("Error al copiar la imagen");
+                }
+
+                //Reemplazar la imagen de selección por la imagen seleccionada
+                Image imagen = new ImageIcon(rutaNueva).getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
+                Portada.setIcon(new ImageIcon(imagen));
+                repaint();
+            }
         }
     }
     
@@ -241,7 +251,7 @@ public class CRUD_Libro extends JPanel{
         ruta = new ImageIcon(getClass().getResource("/imagenes/addCover.png"));
         Image imagen = ruta.getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
         Portada.setIcon(new ImageIcon(imagen));
-        rutaWeb = "";
+        rutaNueva = "";
         
         Titulo.clear();
         Autor.clear();

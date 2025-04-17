@@ -1,0 +1,8 @@
+Instalar las dos fuentes. Poppins y Dytam.
+
+Importar la base de datos en una base llamada gestorbiblioteca.
+-Entrar en la base de datos, seleccionar la opción de importar y seleccionar el archivo gestorbiblioteca.sql
+
+En la clase CRUD_Libro, EN CASO DE QUE TENGAS INSTALADO EL XAMPP EN UN DISCO D U OTRO, modificar la linea 216 a
+D:/xampp/htdocs/Imagenes/
+Lo mismo para la 223, cambiar la letra nomás

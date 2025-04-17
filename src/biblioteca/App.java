@@ -1,6 +1,7 @@
 package biblioteca;
 
 //Se importan las librerias a usar
+import Conexion.Peticiones;
 import javax.swing.*;
 import java.awt.*;
 import Conexion.Sesion;
@@ -32,15 +33,13 @@ public class App extends JFrame{
         contentPanel.setLayout(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
 
-        //agrega el Inicio como primer vista a cargar
-        contentPanel.add(new CRUD_Libro());
+        //Agrega el usuario como primer vista a cargar
+        contentPanel.add(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getFechaCreacion(), Sesion.getFoto()));
         
         //Se agregan los paneles al frame y lo hace visible
         add(menu, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
         setVisible(true);
-        
-        System.out.println(Sesion.getIdUsuario()+", "+Sesion.getNombreUsuario()+", "+Sesion.getUsuario());
         
 }
 

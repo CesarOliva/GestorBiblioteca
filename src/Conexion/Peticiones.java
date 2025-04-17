@@ -4,6 +4,7 @@ package Conexion;
 import java.sql.*;
 import java.time.LocalDate;
 import biblioteca.App;
+import biblioteca.Usuario;
 
 //"Librerias" personalizadas a importar
 import elementos.WindowMessage;
@@ -17,8 +18,6 @@ public class Peticiones {
     private static LocalDate fecha = LocalDate.now();
 
     private static int IdUsuarioActivo;
-
-    
     
     //Agregar usuario
     public static boolean agregarUsuario(String nombre, String usuario, String contraseña){
@@ -100,8 +99,6 @@ public class Peticiones {
                 if(consultaTipos.next()){
                     String tipo = consultaTipos.getString("TipoUsuario");
                     
-
-                    
                     //Guarda los datos de sesión
                     PreparedStatement busqueda = conexion.prepareStatement("select IdUsuario from usuarios where Usuario='"+usuario+"'");
 
@@ -112,11 +109,13 @@ public class Peticiones {
                         IdUsuarioActivo = resultado.getInt("IdUsuario");
                     }
                     
-                    Sesion.iniciarSesion(IdUsuarioActivo); //Envia el usuario activo
+                    //Envia el usuario activo
+                    Sesion.iniciarSesion(IdUsuarioActivo); 
                     
                     //Abre la aplicación segun el tipo de usuario que es
                     new App(tipo);
                 }
+                
                 biblioteca.LogIn.Formulario.getInstancia().limpiarCampos();
                 biblioteca.LogIn.getInstancia().cerrar();
             }else{ //Si no encuentra el usuario o no coincide la contraseña
@@ -196,7 +195,7 @@ public class Peticiones {
             int IdEditorial;
             //Busca si existe la editorial, sino, lo crea
             if(consultaEditorial.next()){ //Si lo encuentra en la tabla de autores
-                IdEditorial = consultaAutor.getInt("IdEditorial");
+                IdEditorial = consultaEditorial.getInt("IdEditorial");
             }else{ //Si no existe en la tabla
                 PreparedStatement insertarEditorial = conexion.prepareStatement("insert into editoriales values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS); //Crea un registro de editorial
                 
@@ -265,7 +264,7 @@ public class Peticiones {
 
     
     //Elimina el usuario
-    public void eliminarUsuario(String usuario) {
+    public static void eliminarUsuario(String usuario) {
         try{
             //Inicia la conexion
             Connection conexion = conectar.conectar();
@@ -295,6 +294,65 @@ public class Peticiones {
         }catch(Exception error){
             System.out.println("Error: "+error);
             new WindowError("Ocurrió un error. Intente nuevamente");
+        }
+    }
+    
+    
+    
+    //Obtiene los datos de los usuarios
+    public static void obtenerDatosUsuario(int IdUsuario){        
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+
+            PreparedStatement busquedaUsuario = conexion.prepareStatement("select Nombre, Usuario, FechaCreacion, Foto from usuarios where IdUsuario='"+IdUsuario+"'");
+            //Obtener el nombre, el usuario, la foto, la fecha de creación
+            ResultSet consultaUsuario = busquedaUsuario.executeQuery();
+            
+            String nombre="", usuario="", fechaCreacion="", foto="";
+
+            if(consultaUsuario.next()){
+                nombre = consultaUsuario.getString("Nombre");
+                usuario = consultaUsuario.getString("Usuario");
+                fechaCreacion = consultaUsuario.getString("FechaCreacion");
+                foto = consultaUsuario.getString("Foto");
+            }
+            
+            //LLama la clase de Usuario
+//            new Usuario(nombre, usuario, fechaCreacion, foto);
+            
+            //Cierra la conexión a la base de datos
+            conectar.cerrarConexion();
+        }catch(Exception error){
+            new WindowError("Ha ocurrido un error. Intente nuevamente");
+            System.out.println("Error: "+error);
+        }
+    }
+    
+    
+    
+    //Obtiene los datos de los libros
+    public void obtenerLibros(int IdLibro){        
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+
+            PreparedStatement busquedaLibro = conexion.prepareStatement("select * from libros where IdLibro='"+IdLibro+"'");
+            //Obtener los datos del libro
+            ResultSet consultaLibro = busquedaLibro.executeQuery();
+            
+            if(consultaLibro.next()){
+                //nombre = consultaLibro.getString("Nombre");
+                //usuario = consultaLibro.getString("Usuario");
+                //fechaCreacion = consultaLibro.getString("FechaCreacion");
+                //foto = consultaLibro.getString("Foto");
+            }
+                    
+            //Cierra la conexión a la base de datos
+            conectar.cerrarConexion();
+        }catch(Exception error){
+            new WindowError("Ha ocurrido un error. Intente nuevamente");
+            System.out.println("Error: "+error);
         }
     }
 }
