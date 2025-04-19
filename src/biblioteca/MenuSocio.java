@@ -54,11 +54,11 @@ public class MenuSocio extends JPanel{
         //Cambio de vista al presionar los botones
         inicio.addActionListener((ActionEvent e) -> {
             //Ejecuta el metodo cambiarVista
-            App.cambiarVista(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getFechaCreacion(), Sesion.getFoto()), inicio);
+            App.cambiarVista(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getContraseña(), Sesion.getFechaCreacion(), Sesion.getFoto()), inicio);
         });
         busqueda.addActionListener((ActionEvent e) -> {
             //Ejecuta el metodo cambiarVista
-            App.cambiarVista(new CRUD_Libro(), busqueda);
+            App.cambiarVista(new Busqueda(), busqueda);
         });
         agregarLibro.addActionListener((ActionEvent e) -> {
             //Ejecuta el metodo cambiarVista

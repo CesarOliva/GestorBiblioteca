@@ -9,16 +9,15 @@ import Conexion.Sesion;
 
 import elementos.RoundedButton;
 public class LibroIndividual extends JPanel{
-    public LibroIndividual(String isbn, String titulo, String autor, String portada, int año, 
-        String editorial, String genero, int paginas, String descripcion){
+    public LibroIndividual(String isbn, String titulo, String autor, String portada, String año, 
+        String editorial, String genero, String paginas, String descripcion, String admin){
         //Configuracion del panel
         setLayout(null);
         setBackground(Color.white);
 
         //Creación de los elementos       
-        ImageIcon ruta = new ImageIcon(getClass().getResource(portada));
-        Image imgEscalada = ruta.getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
-        JLabel Portada = new JLabel(new ImageIcon(imgEscalada));
+        Image imagen = new ImageIcon(portada).getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
+        JLabel Portada = new JLabel(new ImageIcon(imagen));
         Portada.setBounds(50,50,200,300);
         
         JLabel Titulo = new JLabel(titulo);
@@ -51,7 +50,7 @@ public class LibroIndividual extends JPanel{
         Descripcion.setFocusable(false);
         Descripcion.setText(descripcion);
 
-        JLabel agregado = new JLabel("Agregado por: "+Sesion.getUsuario());
+        JLabel agregado = new JLabel("Agregado por: "+admin);
         agregado.setFont(new Font("Poppins", Font.PLAIN, 15));
         agregado.setBounds(50, 360, 200, 30);
 
