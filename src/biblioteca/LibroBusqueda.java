@@ -2,9 +2,10 @@ package biblioteca;
 
 //Clase LibroBusqueda. Esqueleto de la vista de los libros en busquedas
 public class LibroBusqueda {
-    private String id, titulo, autor, portada, descripcion;
+    private String titulo, autor, portada, descripcion;
+    private int id;
 
-    public LibroBusqueda(String id, String titulo, String autor, String portada, String descripcion) {
+    public LibroBusqueda(int id, String titulo, String autor, String portada, String descripcion) {
         this.id = id;
         this.titulo = titulo;
         this.autor = autor;
@@ -13,7 +14,7 @@ public class LibroBusqueda {
     }
 
     //Obtener los datos
-    public String getId() { return id; }
+    public int getId() { return id; }
     
     public String getTitulo() { return titulo; }
     

@@ -28,7 +28,7 @@ public class LibroIndividual extends JPanel{
         Autor.setFont(new Font("Poppins", Font.PLAIN, 15));
         Autor.setBounds(290, 80, 200, 30);
 
-        JLabel Año = new JLabel("Año: "+año);
+        JLabel Año = new JLabel("Año de publicación: "+año);
         Año.setFont(new Font("Poppins", Font.PLAIN, 15));
         Año.setBounds(290, 110, 200, 30);
         
@@ -54,7 +54,7 @@ public class LibroIndividual extends JPanel{
         agregado.setFont(new Font("Poppins", Font.PLAIN, 15));
         agregado.setBounds(50, 360, 200, 30);
 
-        JLabel ISBN = new JLabel(isbn);
+        JLabel ISBN = new JLabel("ISBN: "+isbn);
         ISBN.setFont(new Font("Poppins", Font.PLAIN, 15));
         ISBN.setBounds(50, 390, 200, 30);
 

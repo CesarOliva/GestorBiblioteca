@@ -206,6 +206,24 @@ public class Peticiones {
         }
     }
     
+    
+ 
+    //Actualiza los datos del usuario
+    public static void actualizarUsuario(String usuario, String nombre, String contraseña) {
+        try {
+            Connection conexion = conectar.conectar();
+            PreparedStatement pst = conexion.prepareStatement("UPDATE usuarios SET Nombre=?, Contraseña=? WHERE Usuario=?");
+            pst.setString(1, nombre);
+            pst.setString(2, contraseña);
+            pst.setString(3, usuario);
+
+            pst.executeUpdate();
+            System.out.println("Datos actualizados");
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+    }
+    
 
     
     //Elimina el usuario
@@ -474,7 +492,7 @@ public class Peticiones {
             ResultSet consultaLibros = busquedaLibros.executeQuery();
             
             while(consultaLibros.next()){
-                String id = consultaLibros.getString("IdLibro"); 
+                int id = consultaLibros.getInt("IdLibro"); 
                 String titulo = consultaLibros.getString("Titulo"); 
                 String IdAutor = consultaLibros.getString("IdAutor"); 
                 String portada = consultaLibros.getString("Portada"); 
@@ -517,7 +535,7 @@ public class Peticiones {
             ResultSet consultaLibro = busquedaLibro.executeQuery();
             
             while(consultaLibro.next()){
-                String id = consultaLibro.getString("IdLibro"); 
+                int id = consultaLibro.getInt("IdLibro"); 
                 String titulo = consultaLibro.getString("Titulo"); 
                 String autor = consultaLibro.getString("Autor"); 
                 String portada = consultaLibro.getString("Portada"); 

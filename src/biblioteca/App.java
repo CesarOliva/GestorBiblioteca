@@ -11,6 +11,7 @@ public class App extends JFrame{
     private static JPanel contentPanel; //cambia el contenido
     private static JButton botonActivo = null; //Boton que guardará el panel activo
     private static JPanel menu;
+    private static App instancia;
     
     //Constructor
     public App(String tipoUsuario){
@@ -22,11 +23,8 @@ public class App extends JFrame{
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
         
-        if(tipoUsuario.equals("administrador")){
-            menu = new MenuAdmin().menu;
-        }else{
-            menu =new MenuSocio().menu;
-        }
+        instancia = this;
+        menu = new Menu(tipoUsuario).menu;
         
         //Creación del panel de la derecha donde se verá la vista
         contentPanel = new JPanel();
@@ -52,8 +50,6 @@ public class App extends JFrame{
             botonActivo.setForeground(new Color(100, 149, 237));
         }
         
-        
-        
         //Cambiar el diseño al nuevo botón seleccionado
         if(boton!=null){
             boton.setBackground(new Color(100, 149, 237));
@@ -68,5 +64,13 @@ public class App extends JFrame{
         contentPanel.add(panel, BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
+    }
+    
+    public static App getInstancia(){
+        return instancia;
+    }
+    
+    public void cerrar(){
+        dispose();
     }
 }

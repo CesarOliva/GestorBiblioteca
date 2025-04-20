@@ -16,7 +16,6 @@ public class Sesion {
 
     public static void iniciarSesion(int IdUsuario){
         idUsuario = IdUsuario;
-
         try {
             //Inicia la conexión
             Connection conexion = conectar.conectar();

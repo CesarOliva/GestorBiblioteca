@@ -8,7 +8,7 @@ import javax.swing.UIManager;
 public class ejecuter {
     public static void main(String[] args) {
         //Ejecuta el inicio de sesión al iniciar el programa        
-        new App("");
+        new LogIn();
         
         try {
             // Establece el LookAndFeel

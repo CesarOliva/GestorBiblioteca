@@ -23,8 +23,7 @@ import elementos.RoundedButton;
 public class LogIn extends JFrame {
     private boolean logInVista = true; //indica en que panel está
     private JPanel panel;
-    private JButton registrarseBtn;
-    private JButton iniciarBtn;
+    private JButton registrarseBtn, iniciarBtn;
     private static LogIn instancia;
     
     //Constructor
@@ -154,11 +153,7 @@ public class LogIn extends JFrame {
         private ActionListener event;
         private MigLayout layout;
 
-        private JLabel titulo;
-        private JLabel texto;
-        private JLabel texto2;
-        private JLabel texto3;
-        private JLabel imagen;
+        private JLabel titulo, texto, texto2, texto3;
         private JButton boton;
         private boolean logInVista;
         
@@ -189,7 +184,7 @@ public class LogIn extends JFrame {
             boton.setFont(new Font("Poppins", Font.PLAIN, 18));
             boton.setForeground(new Color(100, 149, 237));
 
-            imagen = new JLabel(new FlatSVGIcon("imagenes/login.svg", 150, 200));
+            JLabel imagen = new JLabel(new FlatSVGIcon("imagenes/login.svg", 150, 200));
 
             boton.addActionListener(new ActionListener() {
                 @Override
@@ -283,8 +278,7 @@ public class LogIn extends JFrame {
     
     //Clase del Panel de LogIn y Registro
     public class Formulario extends JPanel {
-        private JPanel login;
-        private JPanel registro;
+        private JPanel login, registro;
         private PlaceholderTextField txtNombreR;
         private PlaceholderTextField txtUserR;
         private JPasswordField txtPassR;
@@ -302,11 +296,11 @@ public class LogIn extends JFrame {
             //Creación del panel de logIn
             login = new JPanel();
             login.setBackground(Color.white);
-            login.setLayout(new MigLayout("wrap", "push[center]push", "push[]25[]10[]10[]25[]push"));
+            login.setLayout(new MigLayout("wrap", "push[center]push", "175[]25[]10[]10[]100[]push"));
 
             //Creación del panel de Registro        
             registro = new JPanel();
-            registro.setLayout(new MigLayout("wrap", "push[center]push", "push[]25[]10[]10[]10[]push"));
+            registro.setLayout(new MigLayout("wrap", "push[center]push", "150[]25[]10[]10[]10[]90[]push"));
             registro.setBackground(Color.white);
 
             //Agrega los cards al panel
@@ -335,12 +329,18 @@ public class LogIn extends JFrame {
             registrarseBtn.setBackground(new Color(100, 149, 237));
             registrarseBtn.setForeground(Color.WHITE);
             registrarseBtn.setFont(new Font("Poppins", Font.PLAIN, 18));
+
+            JLabel logo = new JLabel(new FlatSVGIcon("imagenes/logoLateral.svg", 168, 60));
+            JLabel logo2 = new JLabel(new FlatSVGIcon("imagenes/logoLateral.svg", 168, 60));
+ 
+
             
             registro.add(registrarse);
             registro.add(txtNombreR, "w 50%, h 30");
             registro.add(txtUserR, "w 50%, h 30");
             registro.add(txtPassR, "w 50%, h 30");
             registro.add(registrarseBtn, "w 30%, h 40");
+            registro.add(logo2, "w 190, h 60");
 
 
             //Elementos del LogIn
@@ -368,6 +368,7 @@ public class LogIn extends JFrame {
             login.add(txtUserL, "w 50%, h 30");
             login.add(txtPassL, "w 50%, h 30");
             login.add(iniciarBtn, "w 30%, h 40");
+            login.add(logo, "w 190, h 60");
         }
 
         //Obtiene una instancia de la clase LogIn

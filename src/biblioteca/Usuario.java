@@ -15,10 +15,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class Usuario extends JPanel {
-    private JPanel panelVer, panelEditar;
-    private JLabel fotoUsuario, nombreEdit, usuarioEdit,contraEdit;
+    private JPanel panelVer, panelEditar, panelNoti;
+    private JLabel fotoUsuario, lblNoti;
     private PlaceholderTextField texNombre, texUsuario, texContraseña;
     private ImageIcon ruta;
+    private JTextField txtcontenido;
 
     public Usuario(String Nombre, String Usuario, String Fecha, String Contraseña, String foto) {
         setLayout(null);
@@ -34,6 +35,10 @@ public class Usuario extends JPanel {
         panelEditar.setBackground(Color.white);
         panelEditar.setVisible(false);
 
+        panelNoti = new JPanel(null);
+        panelNoti.setBounds(0,350,800,150);
+        panelNoti.setBackground(Color.LIGHT_GRAY);
+        
         // PANEL VER
         JLabel lblNombre = new JLabel("Nombre:  " + Nombre);
         lblNombre.setBounds(400, 15, 400, 150);
@@ -54,7 +59,7 @@ public class Usuario extends JPanel {
         ImageIcon icon = new ImageIcon(foto);
         Image imagenEscalada = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
         fotoUsuario = new JLabel(new ImageIcon(imagenEscalada));
-        fotoUsuario.setBounds(-20, 55, 400, 200);
+        fotoUsuario.setBounds(-80, 55, 400, 200);
         panelVer.add(fotoUsuario);
 
         JButton btnEditar = new RoundedButton("Editar");
@@ -71,6 +76,7 @@ public class Usuario extends JPanel {
         btnEliminar.setBounds(300, 280, 150, 30);
         panelVer.add(btnEliminar);
 
+       
         // PANEL EDITAR
         
         JLabel nombreEdit = new JLabel("Nombre: ");
@@ -93,13 +99,16 @@ public class Usuario extends JPanel {
         texUsuario = new PlaceholderTextField("Usuario", 30);
         texUsuario.setText(Usuario);
         texUsuario.setBounds(400, 70, 200, 30);
-        texUsuario.setEditable(false);
         panelEditar.add(texUsuario);
 
         texContraseña = new PlaceholderTextField("******", 30);
         texContraseña.setText(Contraseña);
         texContraseña.setBounds(400, 110, 200, 30);
         panelEditar.add(texContraseña);
+        
+        fotoUsuario = new JLabel(new ImageIcon(imagenEscalada));
+        fotoUsuario.setBounds(350, 50, 200, 200);
+        panelEditar.add(fotoUsuario);
 
         JButton btnGuardar = new RoundedButton("Guardar");
         btnGuardar.setFont(new Font("Poppins", Font.PLAIN, 15));
@@ -121,12 +130,12 @@ public class Usuario extends JPanel {
         fotoUsuario.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e){
-                chooseFile();
             }
         });
-
             panelVer.setVisible(false);
             panelEditar.setVisible(true);
+            chooseFile();
+            
         });
 
         btnCancelar.addActionListener(e -> {
@@ -136,10 +145,12 @@ public class Usuario extends JPanel {
 
         btnGuardar.addActionListener(e -> {
             String nuevoNombre = texNombre.getText();
+            String nuevoUsuario = texUsuario.getText();
             String nuevaContraseña = texContraseña.getText();
-           
-            Peticiones.validarUsuario(Sesion.getUsuario(), Sesion.getFoto());
-            JOptionPane.showMessageDialog(null, "Datos actualizados correctamente.");
+            
+            Peticiones.actualizarUsuario(Sesion.getUsuario(), nuevoNombre, nuevaContraseña);
+
+            panelVer.add(fotoUsuario);
             panelEditar.setVisible(false);
             panelVer.setVisible(true);
         });
@@ -148,7 +159,21 @@ public class Usuario extends JPanel {
             new Peticiones();
             new LogIn();
         });
+        
+         //PANEL NOTIFICAIONES
+        
+        JLabel lblNoti = new JLabel("Notificaciones");
+        lblNoti.setBounds(10, 10, 200, 30);
+        panelNoti.add(lblNoti);
+        panelNoti.add(lblNoti);
 
+        for (int i = 0; i < 3; i++) {
+            JTextField campo = new JTextField();
+            campo.setBounds(10, 50 + i * 40, 300, 30);
+            panelNoti.add(campo);
+        }
+
+        panelVer.add(panelNoti);
         add(panelVer);
         add(panelEditar);
     }
@@ -167,18 +192,14 @@ public class Usuario extends JPanel {
             File destino = new File(destinoPath);
             try {
                 Files.copy(archivoSeleccionado.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Image imagen = new ImageIcon(destinoPath).getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                fotoUsuario.setIcon(new ImageIcon(imagen));
+                        fotoUsuario.setBounds(-80, 55, 400, 200);
+                repaint();                
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.out.println("Error al copiar la imagen");
             }
-            Image imagen = new ImageIcon(destinoPath).getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-            fotoUsuario.setIcon(new ImageIcon(imagen));
-            repaint();
         }
-    }
-    
-    //NOTIFICACIONES
-    private void Notificaciones(){
-        
-    }
+    }   
 }
