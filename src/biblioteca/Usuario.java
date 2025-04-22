@@ -1,183 +1,257 @@
 package biblioteca;
 
+//Se importan las librerias necesarias
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.nio.file.*;
+import java.util.ArrayList;
 import javax.swing.filechooser.*;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import Conexion.Sesion;
 import Conexion.Peticiones;
+
+//"Librerias" necesarias a importar
 import elementos.RoundedButton;
 import elementos.PlaceholderTextField;
 import elementos.WindowError;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import elementos.confirmationWindow;
+import elementos.CustomScroll;
 
+//Clase Usuario extendida de JPanel. Panel personalizado
 public class Usuario extends JPanel {
-    private JPanel panelVer, panelEditar, panelNoti;
-    private JLabel fotoUsuario, lblNoti;
-    private PlaceholderTextField texNombre, texUsuario, texContraseña;
+    private JLabel fotoUsuario, lblNombre;
+    private PlaceholderTextField texNombre, texUsuario;
+    private JPasswordField PassContraseña;
+    private String contraseñaActual, Usuario;
+    private JPanel editarUsuario, verUsuario;   
     private ImageIcon ruta;
-    private JTextField txtcontenido;
 
-    public Usuario(String Nombre, String Usuario, String Fecha, String Contraseña, String foto) {
+    public Usuario(String Nombre, String Usuario, String Contraseña, String Fecha, String foto) {
+        //Configuración del panel
         setLayout(null);
         setBackground(Color.white);
-        setPreferredSize(new Dimension(800, 500));
-
-        panelVer = new JPanel(null);
-        panelVer.setBounds(0, 0, 800, 500);
-        panelVer.setBackground(Color.white);
-
-        panelEditar = new JPanel(null);
-        panelEditar.setBounds(0, 0, 800, 500);
-        panelEditar.setBackground(Color.white);
-        panelEditar.setVisible(false);
-
-        panelNoti = new JPanel(null);
-        panelNoti.setBounds(0,350,800,150);
-        panelNoti.setBackground(Color.LIGHT_GRAY);
+        setPreferredSize(new Dimension(550, 600));
         
-        // PANEL VER
-        JLabel lblNombre = new JLabel("Nombre:  " + Nombre);
-        lblNombre.setBounds(400, 15, 400, 150);
-        panelVer.add(lblNombre);
+        //Guarda la contraseña actual
+        this.contraseñaActual = Contraseña;
+        this.Usuario = Usuario;
 
-        JLabel lblUsuario = new JLabel("Usuario:  " + Usuario);
-        lblUsuario.setBounds(400, 55, 400, 150);
-        panelVer.add(lblUsuario);
+        //Creación del panel de verUsuario
+        verUsuario = new JPanel(null);
+        verUsuario.setBounds(0,0,650,300);
+        verUsuario.setBackground(Color.white);
 
-        JLabel lblFecha = new JLabel("Usuario desde:  " + Sesion.getFechaCreacion());
-        lblFecha.setBounds(400, 95, 400, 150);
-        panelVer.add(lblFecha);
+        //Creación de los elementos
+        Image imagen = new ImageIcon(foto).getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+        fotoUsuario = new JLabel(new ImageIcon(imagen));
+        fotoUsuario.setBounds(50, 55, 200, 200);
+        
+        lblNombre = new JLabel("Nombre: " + Nombre);
+        lblNombre.setFont(new Font("Poppins", Font.PLAIN, 14));
+        lblNombre.setBounds(400, 55, 400, 30);
 
-        JLabel lblContraseña = new JLabel("Contraseña:  " + "****");
-        lblContraseña.setBounds(400, 140, 400, 150);
-        panelVer.add(lblContraseña);
+        JLabel lblUsuario = new JLabel("Usuario: " + Usuario);
+        lblUsuario.setFont(new Font("Poppins", Font.PLAIN, 14));
+        lblUsuario.setBounds(400, 100, 400, 30);
 
-        ImageIcon icon = new ImageIcon(foto);
-        Image imagenEscalada = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-        fotoUsuario = new JLabel(new ImageIcon(imagenEscalada));
-        fotoUsuario.setBounds(-80, 55, 400, 200);
-        panelVer.add(fotoUsuario);
+        JLabel lblFecha = new JLabel("Usuario desde: " + Fecha);
+        lblFecha.setFont(new Font("Poppins", Font.PLAIN, 14));
+        lblFecha.setBounds(400, 145, 400, 30);
 
+        JLabel lblContraseña = new JLabel("Contraseña: " + "******");
+        lblContraseña.setFont(new Font("Poppins", Font.PLAIN, 14));        
+        lblContraseña.setBounds(400, 190, 400, 30);
+        
         JButton btnEditar = new RoundedButton("Editar");
         btnEditar.setFont(new Font("Poppins", Font.PLAIN, 15));
-        btnEditar.setBackground(Color.WHITE);
-        btnEditar.setForeground(new Color(100, 149, 237));
-        btnEditar.setBounds(100, 280, 150, 30);
-        panelVer.add(btnEditar);
+        btnEditar.setForeground(Color.WHITE);
+        btnEditar.setBackground(new Color(100, 149, 237));
+        btnEditar.setBounds(100, 260, 150, 30);
 
         JButton btnEliminar = new RoundedButton("Eliminar");
         btnEliminar.setFont(new Font("Poppins", Font.PLAIN, 15));
-        btnEliminar.setBackground(Color.WHITE);
-        btnEliminar.setForeground(new Color(100, 149, 237));
-        btnEliminar.setBounds(300, 280, 150, 30);
-        panelVer.add(btnEliminar);
-
+        btnEliminar.setForeground(Color.WHITE);
+        btnEliminar.setBackground(Color.red);
+        btnEliminar.setBounds(300, 260, 150, 30);
+        
+        //Se agregan los elementos al panel de verUsuario
+        verUsuario.add(fotoUsuario);
+        verUsuario.add(lblNombre);
+        verUsuario.add(lblUsuario);
+        verUsuario.add(lblFecha);
+        verUsuario.add(lblContraseña);
+        verUsuario.add(btnEditar);
+        verUsuario.add(btnEliminar);
+        
+        
+        //Panel de editar usuario
+        editarUsuario = new JPanel(null);
+        editarUsuario.setBounds(0,0,650,320);
+        editarUsuario.setBackground(Color.white);
+        editarUsuario.setVisible(false);
        
-        // PANEL EDITAR
+        // Creación de los elementos        
+        fotoUsuario = new JLabel(new ImageIcon(imagen));
+        fotoUsuario.setBounds(50, 55, 200, 200);
         
         JLabel nombreEdit = new JLabel("Nombre: ");
-        nombreEdit.setBounds(340,-10, 200, 100);
-        panelEditar.add(nombreEdit);
-        
+        nombreEdit.setBounds(340,55, 200, 30);
+
+        texNombre = new PlaceholderTextField(Nombre, 100);
+        texNombre.setFont(new Font("Poppins", Font.PLAIN, 12));
+        texNombre.setBounds(400, 55, 200, 30);
+
         JLabel usuarioEdit = new JLabel("Usuario: ");
-        usuarioEdit.setBounds(340,30, 200, 100);
-        panelEditar.add(usuarioEdit);
+        usuarioEdit.setBounds(340,100, 200, 30);
         
+        texUsuario = new PlaceholderTextField(Usuario, 100);
+        texUsuario.setFont(new Font("Poppins", Font.PLAIN, 12));
+        texUsuario.setBackground(Color.WHITE);
+        texUsuario.setBounds(400, 100, 200, 30);
+        texUsuario.setEnabled(false);
+
         JLabel contraEdit = new JLabel("Contraseña: ");
-        contraEdit.setBounds(330,70,200,100);
-        panelEditar.add(contraEdit);
+        contraEdit.setBounds(330,145,200,30);
+
+        PassContraseña = new JPasswordField(Contraseña, 30);
+        PassContraseña.setFont(new Font("Poppins", Font.PLAIN, 12));
+        PassContraseña.setBackground(Color.WHITE);
+        PassContraseña.setBounds(400, 145, 200, 30);
         
-        texNombre = new PlaceholderTextField("Nombre", 30);
-        texNombre.setText(Nombre);
-        texNombre.setBounds(400, 30, 200, 30);
-        panelEditar.add(texNombre);
-
-        texUsuario = new PlaceholderTextField("Usuario", 30);
-        texUsuario.setText(Usuario);
-        texUsuario.setBounds(400, 70, 200, 30);
-        panelEditar.add(texUsuario);
-
-        texContraseña = new PlaceholderTextField("******", 30);
-        texContraseña.setText(Contraseña);
-        texContraseña.setBounds(400, 110, 200, 30);
-        panelEditar.add(texContraseña);
-        
-        fotoUsuario = new JLabel(new ImageIcon(imagenEscalada));
-        fotoUsuario.setBounds(350, 50, 200, 200);
-        panelEditar.add(fotoUsuario);
-
         JButton btnGuardar = new RoundedButton("Guardar");
         btnGuardar.setFont(new Font("Poppins", Font.PLAIN, 15));
-        btnGuardar.setBackground(Color.WHITE);
-        btnGuardar.setForeground(new Color(100, 149, 237));
-        btnGuardar.setBounds(100, 405, 150, 30);
-        panelEditar.add(btnGuardar);
+        btnGuardar.setBackground(new Color(100, 149, 237));
+        btnGuardar.setForeground(Color.white);
+        btnGuardar.setBounds(100, 260, 150, 30);
+        editarUsuario.add(btnGuardar);
 
         JButton btnCancelar = new RoundedButton("Cancelar");
         btnCancelar.setFont(new Font("Poppins", Font.PLAIN, 15));
-        btnCancelar.setBackground(Color.WHITE);
-        btnCancelar.setForeground(new Color(100, 149, 237));
-        btnCancelar.setBounds(300, 405, 150, 30);
-        panelEditar.add(btnCancelar);
+        btnCancelar.setBackground(Color.red);
+        btnCancelar.setForeground(Color.white);
+        btnCancelar.setBounds(300, 260, 150, 30);
+        editarUsuario.add(btnCancelar);
 
-        // Eventos
-        btnEditar.addActionListener(e -> {
-            
+        //Se agregan los elementos al panel de editarUsuario
+        editarUsuario.add(fotoUsuario);
+        editarUsuario.add(nombreEdit);
+        editarUsuario.add(texNombre);
+        editarUsuario.add(usuarioEdit);
+        editarUsuario.add(texUsuario);
+        editarUsuario.add(contraEdit);
+        editarUsuario.add(PassContraseña);
+
+        
+        //Funcionalidad al clickear la foto
         fotoUsuario.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e){
+                    chooseFile();
             }
         });
-            panelVer.setVisible(false);
-            panelEditar.setVisible(true);
-            chooseFile();
+
+        //Panel de notificaciones
+        JPanel notificaciones = new JPanel();
+        notificaciones.setLayout(new BoxLayout(notificaciones, BoxLayout.Y_AXIS));
+        notificaciones.setBounds(0,300,650,300);
+        notificaciones.setBackground(Color.white);
+
+        //Creación de los elementos
+        ArrayList<Notificacion> notificacionesList = Peticiones.obtenerNotificaciones(Sesion.getIdUsuario());
+        
+        for(Notificacion notificacion : notificacionesList){
+            JPanel fila = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+            fila.setBackground(Color.white);
+            fila.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            JPanel card = new JPanel(null);
+            card.setBackground(Color.lightGray);
+            card.setPreferredSize(new Dimension(500, 60));
+            card.setMaximumSize(new Dimension(500, 60));
+            card.setMinimumSize(new Dimension(500, 60));
+            card.setBounds(30, 50, 500, 60);
+
+            JLabel icono = new JLabel(new FlatSVGIcon("imagenes/notificacion.svg", 40, 40));
+            icono.setBounds(0,10,40,40);
+
+            JLabel mensaje = new JLabel(notificacion.getMensaje());
+            mensaje.setBounds(50, 30, 300, 20);
+            mensaje.setFont(new Font("Poppins", Font.PLAIN, 14));
+
+            JLabel borrar = new JLabel(new FlatSVGIcon("imagenes/borrar.svg", 30, 30));
+            borrar.setBounds(350, 20, 30, 30);
+
+            card.add(icono);
+            card.add(mensaje);
+            card.add(borrar);
+            fila.add(card);
             
+            notificaciones.add(fila);
+        }
+        
+        //Funcionalidad de todos los botones     
+        
+        //Alternan entre el panel de ver y de editar usuario
+        btnEditar.addActionListener(e -> {
+            verUsuario.setVisible(false);
+            notificaciones.setVisible(false);
+            editarUsuario.setVisible(true);
         });
 
         btnCancelar.addActionListener(e -> {
-            panelEditar.setVisible(false);
-            panelVer.setVisible(true);
+            verUsuario.setVisible(true);
+            notificaciones.setVisible(true);
+            editarUsuario.setVisible(false);
         });
 
         btnGuardar.addActionListener(e -> {
-            String nuevoNombre = texNombre.getText();
-            String nuevoUsuario = texUsuario.getText();
-            String nuevaContraseña = texContraseña.getText();
-            
-            Peticiones.actualizarUsuario(Sesion.getUsuario(), nuevoNombre, nuevaContraseña);
-
-            panelVer.add(fotoUsuario);
-            panelEditar.setVisible(false);
-            panelVer.setVisible(true);
+            validarDatosUsuario();
         });
 
         btnEliminar.addActionListener(e -> {
-            new Peticiones();
-            new LogIn();
+            new confirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta");
         });
         
-         //PANEL NOTIFICAIONES
+        JScrollPane scrollPane = new CustomScroll(notificaciones);
+        scrollPane.setBounds(0,300,640,260);
         
-        JLabel lblNoti = new JLabel("Notificaciones");
-        lblNoti.setBounds(10, 10, 200, 30);
-        panelNoti.add(lblNoti);
-        panelNoti.add(lblNoti);
-
-        for (int i = 0; i < 3; i++) {
-            JTextField campo = new JTextField();
-            campo.setBounds(10, 50 + i * 40, 300, 30);
-            panelNoti.add(campo);
-        }
-
-        panelVer.add(panelNoti);
-        add(panelVer);
-        add(panelEditar);
+        //Agrega los paneles al panel principal
+        add(verUsuario);
+        add(scrollPane);
+        add(editarUsuario);
     }
 
+    //Valida los datos al actualizar
+    private void validarDatosUsuario(){
+        boolean correcto = true;
+
+        if(texNombre.getText().equals("")){texNombre.setForeground(Color.red); correcto=false;}
+        if(new String(PassContraseña.getPassword()).trim().isEmpty()){PassContraseña.setForeground(Color.red); correcto=false; }
+
+        if(!correcto) return;
+
+        String nombre = texNombre.getText().trim();
+        String contraseña = new String (PassContraseña.getPassword()).trim();
+
+        if(!nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")){
+            texNombre.setForeground(Color.red);
+            correcto=false;
+        }
+
+        if(!correcto) return;
+
+        if(correcto){
+            Peticiones.actualizarUsuario(Usuario, nombre, contraseña);
+            editarUsuario.setVisible(false);
+            verUsuario.setVisible(true);
+            lblNombre.setText(nombre);
+        }
+    }
+
+    //Metodo para escoger la nueva imagen
     private void chooseFile() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Selecciona una imagen");
@@ -186,20 +260,23 @@ public class Usuario extends JPanel {
         fileChooser.setFileFilter(filtro);
 
         int resultado = fileChooser.showOpenDialog(null);
+        
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoSeleccionado = fileChooser.getSelectedFile();
-            String destinoPath = "C:/xampp/htdocs/Imagenes/Foto_" + Sesion.getUsuario() + ".jpg";
+            String destinoPath = "C:/xampp/htdocs/Imagenes/"+Usuario+".jpg";
             File destino = new File(destinoPath);
+            
             try {
                 Files.copy(archivoSeleccionado.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 Image imagen = new ImageIcon(destinoPath).getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
                 fotoUsuario.setIcon(new ImageIcon(imagen));
-                        fotoUsuario.setBounds(-80, 55, 400, 200);
+                fotoUsuario.setBounds(50, 55, 200, 200);
+                
                 repaint();                
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                System.out.println("Error al copiar la imagen");
+            } catch (Exception error) {
+                new WindowError("Ha ocurrido un error. Intente nuevamente");
+                System.out.println("Error: "+error);
             }
         }
-    }   
+    }
 }

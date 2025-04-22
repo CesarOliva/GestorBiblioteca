@@ -3,14 +3,17 @@ package biblioteca;
 //Se importan las librerias necesarias
 import java.awt.*;
 import javax.swing.*;
-import Conexion.Sesion;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 //"Librerias" personalizadas a importar
-
 import elementos.RoundedButton;
+
+//Clase LibroIndividual extendida de JPanel. Panel personalizado
 public class LibroIndividual extends JPanel{
     public LibroIndividual(String isbn, String titulo, String autor, String portada, String año, 
         String editorial, String genero, String paginas, String descripcion, String admin){
+        
         //Configuracion del panel
         setLayout(null);
         setBackground(Color.white);
@@ -73,6 +76,31 @@ public class LibroIndividual extends JPanel{
         eliminar.setForeground(Color.white);
         eliminar.setBackground(Color.red);
         eliminar.setBounds(180, 460, 100, 30);       
+        
+        Autor.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e){
+                System.out.println(autor);
+                //new Autor();
+            }
+        });
+        
+        Editorial.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e){
+                System.out.println(editorial);
+                //new Editorial();
+            }
+        });
+        
+        agregado.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e){
+                System.out.println(admin);
+                //new Usuario();
+            }
+        });
+        
         
         add(Portada);
         add(Titulo);

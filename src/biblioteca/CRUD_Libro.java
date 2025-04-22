@@ -225,15 +225,14 @@ public class CRUD_Libro extends JPanel{
 
                 try{
                     Files.copy(archivoSeleccionado.toPath(), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }catch(IOException ex){
-                    ex.printStackTrace();
-                    System.out.println("Error al copiar la imagen");
+                    //Reemplazar la imagen de selección por la imagen seleccionada
+                    Image imagen = new ImageIcon(rutaNueva).getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
+                    Portada.setIcon(new ImageIcon(imagen));
+                    repaint();
+                }catch(Exception error){
+                    System.out.println("Error: "+error);
+                    new WindowError("Ha ocurrido un error. Intente nuevamente");
                 }
-
-                //Reemplazar la imagen de selección por la imagen seleccionada
-                Image imagen = new ImageIcon(rutaNueva).getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
-                Portada.setIcon(new ImageIcon(imagen));
-                repaint();
             }
         }
     }

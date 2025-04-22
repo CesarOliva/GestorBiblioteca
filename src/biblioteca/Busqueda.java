@@ -26,6 +26,7 @@ public class Busqueda extends JPanel{
     private JPanel panelResultados;
     private Timer timer;
     private JScrollPane scrollPane;
+    private int offset=0, limite=10;
 
     public Busqueda() {
         //Configuración del panel
@@ -61,7 +62,7 @@ public class Busqueda extends JPanel{
         // Timer para retrasar la búsqueda mientras se escribe
         timer = new Timer(300, e -> {
             if (busquedaTF.validarContenido()) {
-                mostrarLibros(Peticiones.obtenerLibrosRecientes());
+                mostrarLibros(Peticiones.obtenerLibrosRecientes(limite, offset));
             } else {
                 String texto = busquedaTF.getText().trim();
                 mostrarLibros(Peticiones.busquedaLibro(texto));
@@ -74,14 +75,14 @@ public class Busqueda extends JPanel{
 
         // Creacion del panel de resultados
         panelResultados = new JPanel();
-        panelResultados.setLayout(new GridLayout(0, 1, 0, 20));
+        panelResultados.setLayout(new BoxLayout(panelResultados, BoxLayout.Y_AXIS));
         panelResultados.setBackground(Color.white);
         
         //Scrollpane por si no cabe la busqueda en el panel
         scrollPane = new CustomScroll(panelResultados);
 
-        // Cargar todos los libros al iniciar
-        mostrarLibros(Peticiones.obtenerLibrosRecientes());
+        // Cargar los 10 libros mas recientes al iniciar
+        mostrarLibros(Peticiones.obtenerLibrosRecientes(limite, offset));
 
         //Agrega los paneles al panel principal
         add(panelBusqueda, BorderLayout.NORTH);
@@ -92,12 +93,21 @@ public class Busqueda extends JPanel{
     private void mostrarLibros(ArrayList<LibroBusqueda> libros) {
         //Elimina el contenido del panel
         panelResultados.removeAll();
+        
+        //Si no encuentra libros
+        if(libros.isEmpty()){
+            JLabel vacio = new JLabel("No se encontraron busquedas coincidentes");
+            vacio.setFont(new Font("Poppins", Font.PLAIN, 20));
+            
+            panelResultados.add(vacio);
+        }
                 
         //Obtiene la lista de los libros
         for(LibroBusqueda libro : libros){
             //Fila de cada libro
             JPanel fila = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
             fila.setBackground(Color.white);
+            fila.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             //Configuración del panel
             JPanel card = new JPanel();
@@ -151,6 +161,56 @@ public class Busqueda extends JPanel{
             fila.add(card);
             panelResultados.add(fila);
         }
+        
+        JPanel paginacion = new JPanel();
+        paginacion.setLayout(null);
+        paginacion.setBackground(Color.white);
+        paginacion.setPreferredSize(new Dimension(550, 60));
+        
+        //Botones para paginación      
+        JButton anterior;
+        anterior = new RoundedButton("Anterior");
+        anterior.setForeground(Color.white);
+        anterior.setBackground(new Color(100, 149, 237));
+        anterior.setFont(new Font("Poppins", Font.PLAIN, 12));
+        anterior.setBounds(65, 0, 100, 40);
+        
+        if(offset>0){
+            anterior.addActionListener(e->{
+                //Posición de busqueda de libro
+               offset-=limite;
+               if(offset<0){
+                   offset=0;
+               }
+               
+               mostrarLibros(Peticiones.obtenerLibrosRecientes(limite, offset));
+            });            
+        }
+        
+        JButton siguiente = new RoundedButton("Siguiente");
+        siguiente.setForeground(Color.white);
+        siguiente.setBackground(new Color(100, 149, 237));
+        siguiente.setFont(new Font("Poppins", Font.PLAIN, 12));
+        siguiente.setBounds(465, 0, 100, 40);
+        
+        siguiente.addActionListener(e->{
+            //Posición de busqueda de libro
+            offset+=limite;
+            mostrarLibros(Peticiones.obtenerLibrosRecientes(limite, offset));
+        });
+        
+        // Desactiva botón anterior
+        anterior.setEnabled(offset > 0);
+
+        // Desactiva botón siguiente
+        siguiente.setEnabled(offset + limite < Peticiones.contarLibros());
+        
+        //Agregar los botones al panel de paginacion y el panel al panel de resultados
+        paginacion.add(siguiente);
+        paginacion.add(anterior);
+        
+        panelResultados.add(paginacion);
+        
         panelResultados.revalidate();
         panelResultados.repaint();   
         

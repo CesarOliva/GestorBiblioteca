@@ -357,7 +357,10 @@ public class LogIn extends JFrame {
             iniciarBtn = new RoundedButton("Iniciar Sesión");
             iniciarBtn.setBackground(new Color(100, 149, 237));
             iniciarBtn.setForeground(Color.WHITE);
-            iniciarBtn.setFont(new Font("Poppins", Font.PLAIN, 18));      
+            iniciarBtn.setFont(new Font("Poppins", Font.PLAIN, 18));    
+            
+            resetPlaceholder(txtNombreR);
+            resetPlaceholder(txtUserR);
             
             //Funcionalidad del botón de logIn
             iniciarBtn.addActionListener((ActionEvent e)->{
@@ -376,11 +379,19 @@ public class LogIn extends JFrame {
             return instancia;
         }
         
-        
+        //Resetea el textField
+        private void resetPlaceholder(PlaceholderTextField tf){
+            tf.addFocusListener(new FocusAdapter() {
+                @Override
+                public void focusGained(FocusEvent e) {
+                    ((PlaceholderTextField)tf).resetPlaceholder();
+                }       
+            });        
+        }    
         
         //Metodos que validan los datos de los campos del formulario
         public boolean validarRegistro(){
-            String nombre = txtNombreR.getText();
+            String nombre = txtNombreR.getText().trim();
             String user = txtUserR.getText().trim();
             String pass = new String(txtPassR.getPassword());
 
@@ -394,7 +405,7 @@ public class LogIn extends JFrame {
             //Verifica que estén todos los campos seleccionados
             if(txtNombreR.validarContenido() || txtUserR.validarContenido() || pass.isEmpty() || encontrado){
                 if(txtNombreR.validarContenido() || encontrado) txtNombreR.setForeground(Color.red);
-                if(txtUserR.validarContenido()) txtUserR.setForeground(Color.red);
+                if(txtUserR.validarContenido() || user.contains(" ")) txtUserR.setForeground(Color.red);
                 if(pass.isEmpty()) txtPassR.setForeground(Color.red);
                 return false;
             }else{

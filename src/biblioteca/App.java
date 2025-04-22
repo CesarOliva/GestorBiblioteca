@@ -24,7 +24,6 @@ public class App extends JFrame{
         setLocationRelativeTo(null);
         
         instancia = this;
-        menu = new Menu(tipoUsuario).menu;
         
         //Creación del panel de la derecha donde se verá la vista
         contentPanel = new JPanel();
@@ -32,7 +31,8 @@ public class App extends JFrame{
         contentPanel.setBackground(Color.WHITE);
 
         //Agrega el usuario como primer vista a cargar
-        contentPanel.add(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getContraseña(), Sesion.getFechaCreacion(), Sesion.getFoto()));
+        contentPanel.add(new JPanel());
+        menu = new Menu(tipoUsuario).menu;
         
         //Se agregan los paneles al frame y lo hace visible
         add(menu, BorderLayout.WEST);
@@ -72,5 +72,6 @@ public class App extends JFrame{
     
     public void cerrar(){
         dispose();
+        Sesion.cerrarSesion();
     }
 }

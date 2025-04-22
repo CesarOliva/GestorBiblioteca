@@ -1,8 +1,9 @@
 package elementos;
 
 //Importa las librerias necesarias
-import javax.swing.JButton;
+import javax.swing.*;
 import java.awt.*;
+import javax.swing.plaf.basic.*;
 
 //Clase extendida de JButton. Botón personalizado
 public class RoundedButton extends JButton {
@@ -10,6 +11,30 @@ public class RoundedButton extends JButton {
         super(text);
         setContentAreaFilled(false); // Evita el fondo por defecto
         setFocusPainted(false); // Quita el borde de selección
+
+        setUI(new BasicButtonUI() {
+            @Override
+            public void paint(Graphics g, JComponent c) {
+                AbstractButton button = (AbstractButton) c;
+                ButtonModel model = button.getModel();
+                Graphics2D g2 = (Graphics2D) g.create();
+
+                if (!model.isEnabled()) {
+                    g2.setColor(new Color(200, 200, 200)); // fondo cuando está deshabilitado
+                    g2.fillRect(0, 0, c.getWidth(), c.getHeight());
+
+                    g2.setColor(Color.black); // texto cuando está deshabilitado
+                    FontMetrics fm = g2.getFontMetrics();
+                    int x = (c.getWidth() - fm.stringWidth(button.getText())) / 2;
+                    int y = (c.getHeight() + fm.getAscent()) / 2 - 2;
+                    g2.drawString(button.getText(), x, y);
+                } else {
+                    super.paint(g, c);
+                }
+
+                g2.dispose();
+            }
+        });
     }
 
     

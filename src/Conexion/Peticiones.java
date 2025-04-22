@@ -4,9 +4,13 @@ package Conexion;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.io.*;
+import java.nio.file.*;
+
 import biblioteca.App;
 import biblioteca.LibroBusqueda;
 import biblioteca.LibroIndividual;
+import biblioteca.Notificacion;
 
 //"Librerias" personalizadas a importar
 import elementos.WindowMessage;
@@ -46,21 +50,42 @@ public class Peticiones {
                 //Pasa los valores
                 insertarUsuario.setInt(1, 0);
                 insertarUsuario.setString(2, nombre);
-
+                
                 //si es usuario admin
                 if(usuario.contains("admin:")){
                     //quitar el "admin:" del usuario
                     String[] admin = usuario.split("admin:");
                     insertarUsuario.setString(3, admin[1]);
+
+                    File Carpeta = new File("C:/xampp/htdocs/Imagenes");
+                    //Si no existe la carpeta la crea
+                    if(!Carpeta.exists()){
+                        Carpeta.mkdirs();
+                    }
+                    
+                    //Ruta donde se guardará la imagen
+                    String ruta = "C:/xampp/htdocs/Imagenes/"+admin[1]+".jpg";
+                    File destino = new File(ruta);
+
+                    Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    
+                    insertarUsuario.setString(6, "C:/xampp/htdocs/Imagenes/"+admin[1]+".jpg"); 
                     insertarUsuario.setString(7, "administrador");
                 }else{
                     insertarUsuario.setString(3, usuario);
+
+                    //Ruta donde se guardará la imagen
+                    String ruta = "C:/xampp/htdocs/Imagenes/"+usuario+".jpg";
+                    File destino = new File(ruta);
+
+                    Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                        
+                    insertarUsuario.setString(6, "C:/xampp/htdocs/Imagenes/"+usuario+".jpg"); 
                     insertarUsuario.setString(7, "socio");
                 }
                 
                 insertarUsuario.setString(4, contraseña);
                 insertarUsuario.setDate(5, java.sql.Date.valueOf(fecha));
-                insertarUsuario.setString(6, "C:/xampp/htdocs/Imagenes/Usuario.jpg");
 
                 //Ejecuta los cambios
                 insertarUsuario.executeUpdate();
@@ -175,7 +200,7 @@ public class Peticiones {
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
         }catch(Exception error){
-            new WindowError("Ha ocurrido un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente");
             System.out.println("Error: "+error);
         }
     }
@@ -183,7 +208,10 @@ public class Peticiones {
     
     
     //Obtiene las notificaciones
-    public static void obtenerNotificaciones(int IdUsuario){
+    public static ArrayList<Notificacion> obtenerNotificaciones(int IdUsuario){
+        //Crea una lista de notificaciones
+        ArrayList<Notificacion> notificaciones = new ArrayList<>();
+        
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
@@ -191,11 +219,15 @@ public class Peticiones {
             PreparedStatement busquedaNoti = conexion.prepareStatement("select * from notificaciones where IdUsuario='"+IdUsuario+"'");
             ResultSet consultaNoti = busquedaNoti.executeQuery();
             
-            String mensaje="";
+            int id=0;
+            String mensaje="", tipo="";
             //Recorre todas las notificaciones consultadas
             while(consultaNoti.next()){
                 mensaje = consultaNoti.getString("Mensaje");
-                System.out.println(mensaje);
+                tipo = consultaNoti.getString("Tipo");
+                id = consultaNoti.getInt("IdNotificacion");
+                
+                notificaciones.add(new Notificacion(id, mensaje, tipo));
             }
 
             //Cierra la conexion
@@ -204,6 +236,8 @@ public class Peticiones {
             System.out.println("Error: "+error);
             new WindowError("Ocurrió un error. Intente nuevamente");            
         }
+        
+        return notificaciones;
     }
     
     
@@ -211,17 +245,25 @@ public class Peticiones {
     //Actualiza los datos del usuario
     public static void actualizarUsuario(String usuario, String nombre, String contraseña) {
         try {
+            //Inicia la conexión
             Connection conexion = conectar.conectar();
-            PreparedStatement pst = conexion.prepareStatement("UPDATE usuarios SET Nombre=?, Contraseña=? WHERE Usuario=?");
-            pst.setString(1, nombre);
-            pst.setString(2, contraseña);
-            pst.setString(3, usuario);
+            
+            PreparedStatement actualizarUsuario = conexion.prepareStatement("update usuarios set Nombre=?, Contraseña=? where Usuario=?");
+            
+            actualizarUsuario.setString(1, nombre);
+            actualizarUsuario.setString(2, contraseña);
+            actualizarUsuario.setString(3, usuario);
 
-            pst.executeUpdate();
-            System.out.println("Datos actualizados");
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+            actualizarUsuario.executeUpdate();
+            
+            new WindowMessage("Datos actualizados correctamente");
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        } catch (Exception error) {
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");            
+        }
     }
     
 
@@ -243,13 +285,15 @@ public class Peticiones {
                 int filasAfectadas = eliminarUsuario.executeUpdate();
                 
                 if (filasAfectadas > 0) {
+                    //Muestra qye eliminó el usuario
                     new WindowMessage("Usuario eliminado correctamente.");
+                    biblioteca.App.getInstancia().cerrar();
                     new biblioteca.LogIn();
                 } else {
-                    new WindowError("Usuario referenciado incorrectamente");
+                    new WindowError("Ocurrió un error. Intente nuevamente");
                 }
             }else{
-                new WindowError("Usuario referenciado incorrectamente");
+                new WindowError("Ocurrió un error. Intente nuevamente");
             }
             
             //Cierra la conexión a la base de datos
@@ -271,7 +315,7 @@ public class Peticiones {
         try{
             //Inicia la conexion
             Connection conexion = conectar.conectar();
-
+            
             //Busca si ya existe el autor, el genero y la editorial
             PreparedStatement buscarAutor = conexion.prepareStatement("select IdAutor FROM autores WHERE Nombre= ?");
             PreparedStatement buscarGenero = conexion.prepareStatement("select IdGenero FROM generos WHERE Genero= ?");
@@ -296,7 +340,14 @@ public class Peticiones {
                 insertarAutor.setString(1, "0");
                 insertarAutor.setString(2, autor);
                 insertarAutor.setString(3, "Sobre el autor");
-                insertarAutor.setString(4, "C:/xampp/htdocs/Imagenes/Usuario.jpg");
+                
+                //Ruta donde se guardará la imagen
+                String ruta = "C:/xampp/htdocs/Imagenes/"+autor.replace(" ","")+".jpg";
+                File destino = new File(ruta);
+
+                Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                
+                insertarAutor.setString(4, "C:/xampp/htdocs/Imagenes/"+autor.replace(" ","_")+".jpg");
                 
                 insertarAutor.executeUpdate();
                 
@@ -338,7 +389,14 @@ public class Peticiones {
                 insertarEditorial.setString(1, "0");
                 insertarEditorial.setString(2, editorial);
                 insertarEditorial.setString(3, "Sobre la editorial");
-                insertarEditorial.setString(4, "C:/xampp/htdocs/Imagenes/Editorial.jpg");
+                
+                //Ruta donde se guardará la imagen
+                String ruta = "C:/xampp/htdocs/Imagenes/"+editorial.replace(" ","_")+".jpg";
+                File destino = new File(ruta);
+
+                Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                insertarEditorial.setString(4, "C:/xampp/htdocs/Imagenes/"+editorial.replace(" ","")+".jpg");
                 
                 insertarEditorial.executeUpdate();
                 
@@ -482,13 +540,17 @@ public class Peticiones {
     
     
     //Obtiene todos los libros y regresa la lista
-    public static ArrayList<LibroBusqueda> obtenerLibrosRecientes(){
+    public static ArrayList<LibroBusqueda> obtenerLibrosRecientes(int limite, int offset){
         ArrayList<LibroBusqueda> libros = new ArrayList<>();
         try{
             //Inicia la conexion
             Connection conexion = conectar.conectar();
             
-            PreparedStatement busquedaLibros = conexion.prepareStatement("select * from libros");
+            PreparedStatement busquedaLibros = conexion.prepareStatement("select * from libros order by IdLibro desc limit ? offset ?");
+            //El limite de elementos a mostrar en paginasción y la posición de busqueda
+            busquedaLibros.setInt(1, limite);
+            busquedaLibros.setInt(2, offset);
+            
             ResultSet consultaLibros = busquedaLibros.executeQuery();
             
             while(consultaLibros.next()){
@@ -516,6 +578,31 @@ public class Peticiones {
         }
         //Retorna la lista de libros
         return libros;
+    }
+    
+    
+    
+    //Contar la cantidad de libros en la base de datos
+    public static int contarLibros() {
+        int total = 0;
+        
+        try {
+            Connection conexion = conectar.conectar();
+            
+            //Cuenta los elementos de la tabla de libros
+            PreparedStatement busquedaLibros = conexion.prepareStatement("select count(*) as total from libros");
+            ResultSet consultaLibros = busquedaLibros.executeQuery();
+            if (consultaLibros.next()) {
+                total = consultaLibros.getInt("total");
+            }
+
+            //Cierra la conexión
+            conectar.cerrarConexion();
+        } catch (Exception error) {
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");
+        }
+        return total;
     }
     
     
