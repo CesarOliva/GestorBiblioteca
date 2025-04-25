@@ -5,30 +5,47 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import Conexion.Peticiones;
+import Conexion.Sesion;
 
 //"Librerias" personalizadas a importar
 import elementos.RoundedButton;
+import elementos.confirmationWindow;
 
 //Clase LibroIndividual extendida de JPanel. Panel personalizado
 public class LibroIndividual extends JPanel{
-    public LibroIndividual(String isbn, String titulo, String autor, String portada, String año, 
+    JButton editar, eliminar, rentar;
+    
+    public LibroIndividual(int IdLibro, String isbn, String titulo, String autor, String portada, String año, 
         String editorial, String genero, String paginas, String descripcion, String admin){
         
         //Configuracion del panel
         setLayout(null);
         setBackground(Color.white);
 
-        //Creación de los elementos       
-        Image imagen = new ImageIcon(portada).getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
-        JLabel Portada = new JLabel(new ImageIcon(imagen));
-        Portada.setBounds(50,50,200,300);
+        
+        //Creación de los elementos
+        JLabel Portada = new JLabel();
+        
+        //Intente cargar la imagen, de lo contrario cargar una imagen default
+        File archivo = new File(portada);
+        if (archivo.exists()) {
+            Image imagen = new ImageIcon(portada).getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
+            Portada.setIcon(new ImageIcon(imagen));
+        }else{
+            Image imagen = new ImageIcon(getClass().getResource("/imagenes/addCover.png")).getImage()
+                        .getScaledInstance(200, 300, Image.SCALE_SMOOTH);
+            Portada.setIcon(new ImageIcon(imagen));
+        }
+        Portada.setBounds(50, 50, 200, 300);
         
         JLabel Titulo = new JLabel(titulo);
         Titulo.setFont(new Font("Poppins", Font.PLAIN, 15));        
         Titulo.setBounds(290, 50, 200, 30);
         
         JLabel Autor = new JLabel(autor);
-        Autor.setFont(new Font("Poppins", Font.PLAIN, 15));
+        Autor.setFont(new Font("Poppins", Font.BOLD, 15));
         Autor.setBounds(290, 80, 200, 30);
 
         JLabel Año = new JLabel("Año de publicación: "+año);
@@ -36,7 +53,7 @@ public class LibroIndividual extends JPanel{
         Año.setBounds(290, 110, 200, 30);
         
         JLabel Editorial = new JLabel(editorial);
-        Editorial.setFont(new Font("Poppins", Font.PLAIN, 15));
+        Editorial.setFont(new Font("Poppins", Font.BOLD, 15));
         Editorial.setBounds(290, 140, 200, 30);
         
         JLabel Genero = new JLabel("Genero: "+genero);
@@ -64,32 +81,66 @@ public class LibroIndividual extends JPanel{
         JLabel Paginas = new JLabel("Número de paginas: "+paginas);
         Paginas.setFont(new Font("Poppins", Font.PLAIN, 15));
         Paginas.setBounds(50, 420, 200, 30);
-        
-        JButton editar = new RoundedButton("Editar"); 
+
+        editar = new RoundedButton("Editar"); 
         editar.setFont(new Font("Poppins", Font.PLAIN, 15));
         editar.setForeground(Color.white);
         editar.setBackground(new Color(100, 149, 237));
         editar.setBounds(50, 460, 100, 30);       
 
-        JButton eliminar = new RoundedButton("Eliminar"); 
+        eliminar = new RoundedButton("Eliminar"); 
         eliminar.setFont(new Font("Poppins", Font.PLAIN, 15));
         eliminar.setForeground(Color.white);
         eliminar.setBackground(Color.red);
-        eliminar.setBounds(180, 460, 100, 30);       
+        eliminar.setBounds(180, 460, 100, 30);                
         
+        rentar = new RoundedButton("Rentar"); 
+        rentar.setFont(new Font("Poppins", Font.PLAIN, 15));
+        rentar.setForeground(Color.white);
+        rentar.setBackground(new Color(100, 149, 237));
+        rentar.setBounds(50, 460, 100, 30);       
+        
+        if(Sesion.getTipo().equals("administrador")){
+            editar.setVisible(true);
+            eliminar.setVisible(true);
+            rentar.setVisible(false);
+        }else{
+            editar.setVisible(false);
+            eliminar.setVisible(false);
+            rentar.setVisible(true);
+        }
+        
+        
+        //Funcionalidad de los elementos
         Autor.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e){
-                System.out.println(autor);
-                //new Autor();
+                Peticiones.obtenerAutor(autor);
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Autor.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Autor.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         });
         
         Editorial.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e){
-                System.out.println(editorial);
-                //new Editorial();
+                Peticiones.obtenerEditorial(editorial);
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                Editorial.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Editorial.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         });
         
@@ -101,7 +152,20 @@ public class LibroIndividual extends JPanel{
             }
         });
         
+        editar.addActionListener(e->{
+            
+        });
         
+        eliminar.addActionListener(e->{
+            new confirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar el libro",
+                () -> Peticiones.eliminarLibro(IdLibro));
+        });
+        
+        rentar.addActionListener(e->{
+            Peticiones.PrestarLibroIndividual(Sesion.getIdUsuario(), IdLibro, titulo); 
+        });
+        
+        //Se agregan los elementos al panel
         add(Portada);
         add(Titulo);
         add(Autor);
@@ -113,6 +177,7 @@ public class LibroIndividual extends JPanel{
         add(agregado);
         add(Paginas);
         add(editar);
+        add(rentar);
         add(eliminar);
     }
 }

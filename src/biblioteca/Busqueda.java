@@ -1,24 +1,20 @@
 package biblioteca;
 
-import java.sql.*;
-import Conexion.Conexion;
-
 //Se importan las librerias necesarias 
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
-import java.awt.event.ActionEvent;
-
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import Conexion.Peticiones;
+import java.io.File;
 
 //"Libererias" personalizadas a importar
 import elementos.PlaceholderTextField;
 import elementos.RoundedButton;
 import elementos.CustomScroll;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 //Clase Busqueda extendida de JPanel. Panel personalizado
 public class Busqueda extends JPanel{
@@ -35,13 +31,13 @@ public class Busqueda extends JPanel{
 
         // Panel de búsqueda
         JPanel panelBusqueda = new JPanel(null);
-        panelBusqueda.setPreferredSize(new Dimension(550, 120));
+        panelBusqueda.setPreferredSize(new Dimension(550, 80));
         panelBusqueda.setBackground(Color.white);
         
         //Creación de los elementos
         busquedaTF = new PlaceholderTextField("Buscar libros por titulo u autor", 100);
         busquedaTF.setFont(new Font("Poppins", Font.PLAIN, 14));
-        busquedaTF.setBounds(100, 30, 400, 40);
+        busquedaTF.setBounds(100, 20, 400, 40);
         
         // Configurar el DocumentListener para búsqueda en tiempo real
         busquedaTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -118,16 +114,27 @@ public class Busqueda extends JPanel{
 
             //Creación de los elementos
             String portada = libro.getPortada();
-            Image imagen = new ImageIcon(portada).getImage().getScaledInstance(133, 200, Image.SCALE_SMOOTH);
-            JLabel Portada = new JLabel(new ImageIcon(imagen));
+            
+            //Intente cargar la imagen, de lo contrario cargar una imagen default
+            File archivo = new File(portada);
+            JLabel Portada = new JLabel();
+            if (archivo.exists()) {
+                Image imagen = new ImageIcon(portada).getImage().getScaledInstance(133, 200, Image.SCALE_SMOOTH);
+                Portada.setIcon(new ImageIcon(imagen));
+            }else{
+                Image imagen = new ImageIcon(getClass().getResource("/imagenes/addCover.png")).getImage()
+                            .getScaledInstance(133, 200, Image.SCALE_SMOOTH);
+                Portada.setIcon(new ImageIcon(imagen));
+            }
             Portada.setBounds(10,12,133,200);
+            
 
             JLabel Titulo = new JLabel(libro.getTitulo());
             Titulo.setFont(new Font("Poppins", Font.PLAIN, 14));        
             Titulo.setBounds(150, 0, 200, 30);
 
             JLabel Autor = new JLabel(libro.getAutor());
-            Autor.setFont(new Font("Poppins", Font.PLAIN, 14));
+            Autor.setFont(new Font("Poppins", Font.BOLD, 14));
             Autor.setBounds(150, 30, 200, 30);
 
             JTextArea Descripcion = new JTextArea(libro.getDescripcion());
@@ -149,6 +156,23 @@ public class Busqueda extends JPanel{
             verMas.addActionListener(e -> {
                 Peticiones.ObtenerLibroIndividual(idLibro);
             });
+            
+            Autor.addMouseListener(new MouseAdapter(){
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    Peticiones.obtenerAutor(libro.getAutor());
+                }
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    Autor.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    Autor.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
+
 
             //agrega el contenido al card
             card.add(Portada);

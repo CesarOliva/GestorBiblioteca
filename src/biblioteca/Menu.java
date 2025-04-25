@@ -13,6 +13,7 @@ import elementos.RoundedButton;
 
 public class Menu extends JPanel{
     public JPanel menu;
+    public static JButton busqueda, inicio;
     
     public Menu(String tipoUsuario){
         //Se crea el panel del lado izquierdo (Menú) que contiene los botones que cambian la vista
@@ -25,13 +26,13 @@ public class Menu extends JPanel{
         logo.setBounds(55, 20, 143, 130);
 
         //Creación y diseño de los botones
-        JButton inicio = new RoundedButton("Inicio");
+        inicio = new RoundedButton("Inicio");
         inicio.setFont(new Font("Poppins", Font.PLAIN, 15));
         inicio.setBackground(Color.WHITE);
         inicio.setForeground(new Color(100, 149, 237));
         inicio.setBounds(50, 170, 150, 30);
 
-        JButton busqueda = new RoundedButton("Busqueda");
+        busqueda = new RoundedButton("Busqueda");
         busqueda.setFont(new Font("Poppins", Font.PLAIN, 15));
         busqueda.setBackground(Color.WHITE);
         busqueda.setForeground(new Color(100, 149, 237));

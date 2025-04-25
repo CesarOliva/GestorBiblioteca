@@ -7,10 +7,7 @@ import java.util.ArrayList;
 import java.io.*;
 import java.nio.file.*;
 
-import biblioteca.App;
-import biblioteca.LibroBusqueda;
-import biblioteca.LibroIndividual;
-import biblioteca.Notificacion;
+import biblioteca.*;
 
 //"Librerias" personalizadas a importar
 import elementos.WindowMessage;
@@ -51,17 +48,17 @@ public class Peticiones {
                 insertarUsuario.setInt(1, 0);
                 insertarUsuario.setString(2, nombre);
                 
+                File Carpeta = new File("C:/xampp/htdocs/Imagenes");
+                //Si no existe la carpeta la crea
+                if(!Carpeta.exists()){
+                    Carpeta.mkdirs();
+                }
+                
                 //si es usuario admin
                 if(usuario.contains("admin:")){
                     //quitar el "admin:" del usuario
                     String[] admin = usuario.split("admin:");
                     insertarUsuario.setString(3, admin[1]);
-
-                    File Carpeta = new File("C:/xampp/htdocs/Imagenes");
-                    //Si no existe la carpeta la crea
-                    if(!Carpeta.exists()){
-                        Carpeta.mkdirs();
-                    }
                     
                     //Ruta donde se guardará la imagen
                     String ruta = "C:/xampp/htdocs/Imagenes/"+admin[1]+".jpg";
@@ -179,34 +176,6 @@ public class Peticiones {
     
     
         
-    //Obtiene los datos de los usuarios
-    public static void obtenerDatosUsuario(int IdUsuario){        
-        try{
-            //Inicia la conexión
-            Connection conexion = conectar.conectar();
-
-            PreparedStatement busquedaUsuario = conexion.prepareStatement("select Nombre, Usuario, FechaCreacion, Foto from usuarios where IdUsuario='"+IdUsuario+"'");
-            ResultSet consultaUsuario = busquedaUsuario.executeQuery();
-            
-            String nombre="", usuario="", fechaCreacion="", foto="";
-
-            if(consultaUsuario.next()){
-                nombre = consultaUsuario.getString("Nombre");
-                usuario = consultaUsuario.getString("Usuario");
-                fechaCreacion = consultaUsuario.getString("FechaCreacion");
-                foto = consultaUsuario.getString("Foto");
-            }
-            
-            //Cierra la conexión a la base de datos
-            conectar.cerrarConexion();
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");
-            System.out.println("Error: "+error);
-        }
-    }
-    
-    
-    
     //Obtiene las notificaciones
     public static ArrayList<Notificacion> obtenerNotificaciones(int IdUsuario){
         //Crea una lista de notificaciones
@@ -241,6 +210,33 @@ public class Peticiones {
     }
     
     
+    
+    //Elimina notificación
+    public static void eliminarNotificacion(int idNotificacion,  Usuario usuario){
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement eliminarNoti = conexion.prepareStatement("delete from notificaciones where IdNotificacion='"+idNotificacion+"'");
+
+            int filasAfectadas = eliminarNoti.executeUpdate();
+
+            if (filasAfectadas > 0) {
+                usuario.cargarNotificaciones();
+            } else {
+                new WindowError("Ocurrió un error. Intente nuevamente");
+            }
+            
+            //Cierra la conexión a la base de datos
+            conectar.cerrarConexion();
+       
+        }catch(Exception error){
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");
+        }
+    }
+    
+    
  
     //Actualiza los datos del usuario
     public static void actualizarUsuario(String usuario, String nombre, String contraseña) {
@@ -255,6 +251,9 @@ public class Peticiones {
             actualizarUsuario.setString(3, usuario);
 
             actualizarUsuario.executeUpdate();
+            
+            Sesion.iniciarSesion(IdUsuarioActivo);
+            App.cambiarVista(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getContraseña(), Sesion.getFechaCreacion(), Sesion.getFoto()), Menu.inicio);
             
             new WindowMessage("Datos actualizados correctamente");
             
@@ -274,25 +273,16 @@ public class Peticiones {
             //Inicia la conexion
             Connection conexion = conectar.conectar();
             
-            //Busca en la base de datos de usuarios
-            PreparedStatement busquedaUsuarios = conexion.prepareStatement("select * from usuarios where Usuario='"+usuario+"'");
-            ResultSet consultaUsuarios = busquedaUsuarios.executeQuery();
-            
-            if(consultaUsuarios.next()){
-                //Elimina el usuario
-                PreparedStatement eliminarUsuario = conexion.prepareStatement("delete from usuarios where Usuario='"+usuario+"'");
+            PreparedStatement eliminarUsuario = conexion.prepareStatement("delete from usuarios where Usuario='"+usuario+"'");
 
-                int filasAfectadas = eliminarUsuario.executeUpdate();
-                
-                if (filasAfectadas > 0) {
-                    //Muestra qye eliminó el usuario
-                    new WindowMessage("Usuario eliminado correctamente.");
-                    biblioteca.App.getInstancia().cerrar();
-                    new biblioteca.LogIn();
-                } else {
-                    new WindowError("Ocurrió un error. Intente nuevamente");
-                }
-            }else{
+            int filasAfectadas = eliminarUsuario.executeUpdate();
+
+            if (filasAfectadas > 0) {
+                //Muestra qye eliminó el usuario
+                new WindowMessage("Usuario eliminado correctamente.");
+                biblioteca.App.getInstancia().cerrar();
+                new biblioteca.LogIn();
+            } else {
                 new WindowError("Ocurrió un error. Intente nuevamente");
             }
             
@@ -527,7 +517,7 @@ public class Peticiones {
                 Usuario = consultaUsuario.getString("Usuario");
             }
 
-            App.cambiarVista(new LibroIndividual(ISBN, Titulo, Autor, Portada, Año, Editorial, Genero, Paginas, Descripcion, Usuario), null);            
+            App.cambiarVista(new LibroIndividual(IdLibro, ISBN, Titulo, Autor, Portada, Año, Editorial, Genero, Paginas, Descripcion, Usuario), null);            
             
             //Cierra la conexion
             conectar.cerrarConexion();
@@ -641,4 +631,275 @@ public class Peticiones {
         //Retorna la lista de libros
         return libros;
     }
+    
+    //Prestamo de libros
+    public static void PrestarLibroIndividual(int IdUsuario, int IdLibro, String titulo){
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement insertarPrestamo = conexion.prepareStatement("insert into prestamos values (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            
+            LocalDate vuelta = LocalDate.now().plusDays(7);
+            //Pasa los valores
+            insertarPrestamo.setString(1, "0");
+            insertarPrestamo.setInt(2, IdUsuario);
+            insertarPrestamo.setInt(3, IdLibro);
+            insertarPrestamo.setDate(4, java.sql.Date.valueOf(fecha));
+            insertarPrestamo.setDate(5, java.sql.Date.valueOf(vuelta));
+            insertarPrestamo.setBoolean(6, false);
+
+            //Ejecuta los cambios
+            insertarPrestamo.executeUpdate();
+            
+            //Crea una notificacion.
+            PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje, Tipo) values (?,?,?)");
+
+            //Pasa los valores
+            insertarNotificacion.setInt(1, IdUsuario);
+            insertarNotificacion.setString(2, "Libro '"+titulo+"' a devolver antes del "+vuelta);
+            insertarNotificacion.setString(3, "Informativa");
+
+            insertarNotificacion.executeUpdate();
+            
+            new WindowMessage("Libro '"+titulo+"' a devolver antes del "+vuelta);
+
+            //Cierra la conexión a la base de datos
+            conectar.cerrarConexion();
+        }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");
+            System.out.println("Error: "+error);
+        }
+    }
+    
+    
+    
+    //Obtener los datos del autor
+    public static void obtenerAutor(String autor){
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement busquedaAutor = conexion.prepareStatement("select * from autores where Nombre='"+autor+"'");
+            ResultSet consultaAutor = busquedaAutor.executeQuery();
+            
+            if(consultaAutor.next()){
+                int idAutor = consultaAutor.getInt("IdAutor");
+                String biografia = consultaAutor.getString("Biografia");
+                String foto = consultaAutor.getString("Foto");
+                
+                App.cambiarVista(new Autor(idAutor, autor, biografia, foto), null);
+            }
+            //Cierra la conexión a la base de datos
+            conectar.cerrarConexion();
+        }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");            
+            System.out.println("Error: "+error);
+        }        
+    }
+    
+    
+    
+    //Obtener los libros del autor
+    public static ArrayList<LibroBusqueda> librosAutor(int idAutor, String autor){
+        ArrayList<LibroBusqueda> libros = new ArrayList<>();
+        
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+
+            PreparedStatement librosAutor = conexion.prepareStatement("select * from libros where IdAutor='"+idAutor+"'");
+            ResultSet consultaLibro = librosAutor.executeQuery();
+
+            while(consultaLibro.next()){
+                int idLibro = consultaLibro.getInt("IdLibro");
+                String titulo = consultaLibro.getString("Titulo"); 
+                String portada = consultaLibro.getString("Portada"); 
+                String descripcion = consultaLibro.getString("Descripcion"); 
+
+                libros.add(new LibroBusqueda(idLibro, titulo, autor, portada, descripcion));
+            }
+        }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");            
+            System.out.println("Error: "+error);
+        }
+        return libros;
+    }
+
+    
+    
+    //Obtener los datos del autor
+    public static void obtenerEditorial(String editorial){
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement busquedaEditorial = conexion.prepareStatement("select * from editoriales where Editorial='"+editorial+"'");
+            ResultSet consultaEditorial = busquedaEditorial.executeQuery();
+            
+            if(consultaEditorial.next()){
+                int idEditorial = consultaEditorial.getInt("IdEditorial");
+                String descripcion = consultaEditorial.getString("Descripcion");
+                String foto = consultaEditorial.getString("Foto");
+                App.cambiarVista(new Editorial(idEditorial, editorial, descripcion, foto), null);
+            }
+            
+            //Cierra la conexión a la base de datos
+            conectar.cerrarConexion();
+        }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");            
+            System.out.println("Error: "+error);
+        }
+    }
+    
+    
+    
+    //Obtener los libros del autor
+    public static ArrayList<LibroBusqueda> librosEditorial(int idEditorial){
+        ArrayList<LibroBusqueda> libros = new ArrayList<>();
+        
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+
+            PreparedStatement librosEditorial = conexion.prepareStatement("select * from libros where IdEditorial='"+idEditorial+"'");
+            ResultSet consultaLibro = librosEditorial.executeQuery();
+
+            while(consultaLibro.next()){
+                int idLibro = consultaLibro.getInt("IdLibro");
+                String titulo = consultaLibro.getString("Titulo"); 
+                String portada = consultaLibro.getString("Portada"); 
+                int IdAutor = consultaLibro.getInt("IdAutor"); 
+                String descripcion = consultaLibro.getString("Descripcion"); 
+                
+                PreparedStatement busquedaAutor = conexion.prepareStatement("select Nombre from autores where IdAutor='"+IdAutor+"'");
+                ResultSet consultaAutor = busquedaAutor.executeQuery();
+                
+                if(consultaAutor.next()){
+                    String autor = consultaAutor.getString("Nombre");
+                    libros.add(new LibroBusqueda(idLibro, titulo, autor, portada, descripcion));
+                }
+            }
+        }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");            
+            System.out.println("Error: "+error);
+        }
+        return libros;
+    }
+
+
+
+    
+    //Elimina el libro
+    public static void eliminarLibro(int idLibro) {
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement eliminarLibro = conexion.prepareStatement("delete from libros where IdLibro='"+idLibro+"'");
+            PreparedStatement eliminarLibroAdministrador = conexion.prepareStatement("delete from librosadministradores where IdLibro='"+idLibro+"'");
+
+            int filasLA = eliminarLibroAdministrador.executeUpdate();
+            int filasLibro = eliminarLibro.executeUpdate();
+
+            if (filasLibro > 0 && filasLA >0) {
+                //Muestra que eliminó el libro
+                new WindowMessage("Libro eliminado correctamente.");
+                App.cambiarVista(new Busqueda(), Menu.busqueda);
+            } else {
+                new WindowError("Ocurrió un error. Intente nuevamente");
+            }
+            
+            //Cierra la conexión a la base de datos
+            conectar.cerrarConexion();
+        }catch(Exception error){
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");
+        }
+    }        
+    
+    
+        
+    //Actualizar datos de la editorial
+    public static void actualizarEditorial(int idEditorial, String editorial, String descripcion, String foto){
+        try {
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement actualizarEditorial = conexion.prepareStatement("update editoriales set Editorial=?, Descripcion=? where idEditorial=?");
+            
+            actualizarEditorial.setString(1, editorial);
+            actualizarEditorial.setString(2, descripcion);
+            actualizarEditorial.setInt(3, idEditorial);
+
+            actualizarEditorial.executeUpdate();
+            
+            new WindowMessage("Datos actualizados correctamente");
+            App.cambiarVista(new Editorial(idEditorial, editorial, descripcion, foto), null);
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        } catch (Exception error) {
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");            
+        }        
+    }
+    
+    
+        
+    //Actualizar datos de la editorial
+    public static void actualizarAutor(int idAutor, String autor, String biografia, String foto){
+        try {
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement actualizarEditorial = conexion.prepareStatement("update autores set Nombre=?, Biografia=? where idAutor=?");
+            
+            actualizarEditorial.setString(1, autor);
+            actualizarEditorial.setString(2, biografia);
+            actualizarEditorial.setInt(3, idAutor);
+
+            actualizarEditorial.executeUpdate();
+            
+            new WindowMessage("Datos actualizados correctamente");
+            App.cambiarVista(new Autor(idAutor, autor, biografia, foto), null);
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        } catch (Exception error) {
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");            
+        }        
+    }
+    
+    
+    
+    //METODOS EXTRA
+    
+    //Hace la conversión de imagen a byte
+    public static byte[] convertirImagenABytes(String ruta) {
+        try{
+            InputStream input = Peticiones.class.getResourceAsStream(ruta);
+            
+            //Si no encuentra la imagen
+            if (input == null) {
+                System.out.println("No se encontró la imagen en: " + ruta);
+                return null;
+            }
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] datos = new byte[1024];
+            int n;
+            while ((n = input.read(datos)) != -1) {
+                buffer.write(datos, 0, n);
+            }
+
+            return buffer.toByteArray(); // Aquí tienes la imagen como byte[]
+        } catch (Exception error) {
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");
+            return null;
+        }
+    }
+
 }

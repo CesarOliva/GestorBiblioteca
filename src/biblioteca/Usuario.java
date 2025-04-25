@@ -16,6 +16,7 @@ import Conexion.Peticiones;
 //"Librerias" necesarias a importar
 import elementos.RoundedButton;
 import elementos.PlaceholderTextField;
+import elementos.PlaceholderPassField;
 import elementos.WindowError;
 import elementos.confirmationWindow;
 import elementos.CustomScroll;
@@ -26,8 +27,11 @@ public class Usuario extends JPanel {
     private PlaceholderTextField texNombre, texUsuario;
     private JPasswordField PassContraseña;
     private String contraseñaActual, Usuario;
-    private JPanel editarUsuario, verUsuario;   
+    private JPanel editarUsuario, verUsuario, notificaciones;   
     private ImageIcon ruta;
+    private Image imagen; 
+    
+    private Usuario instancia;
 
     public Usuario(String Nombre, String Usuario, String Contraseña, String Fecha, String foto) {
         //Configuración del panel
@@ -38,6 +42,8 @@ public class Usuario extends JPanel {
         //Guarda la contraseña actual
         this.contraseñaActual = Contraseña;
         this.Usuario = Usuario;
+        
+        instancia = this;
 
         //Creación del panel de verUsuario
         verUsuario = new JPanel(null);
@@ -45,9 +51,22 @@ public class Usuario extends JPanel {
         verUsuario.setBackground(Color.white);
 
         //Creación de los elementos
-        Image imagen = new ImageIcon(foto).getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-        fotoUsuario = new JLabel(new ImageIcon(imagen));
+        fotoUsuario = new JLabel();
         fotoUsuario.setBounds(50, 55, 200, 200);
+        
+        
+        //Intente cargar la imagen, de lo contrario cargar una imagen default
+        File archivo = new File(foto);
+        if (archivo.exists()) {
+            imagen = new ImageIcon(foto).getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+            fotoUsuario.setIcon(new ImageIcon(imagen));
+        }else{
+            imagen = new ImageIcon(getClass().getResource("/imagenes/Perfil.jpg")).getImage()
+                        .getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+            fotoUsuario.setIcon(new ImageIcon(imagen));
+        }
+        fotoUsuario.setBounds(50, 55, 200, 200);
+
         
         lblNombre = new JLabel("Nombre: " + Nombre);
         lblNombre.setFont(new Font("Poppins", Font.PLAIN, 14));
@@ -116,7 +135,7 @@ public class Usuario extends JPanel {
         JLabel contraEdit = new JLabel("Contraseña: ");
         contraEdit.setBounds(330,145,200,30);
 
-        PassContraseña = new JPasswordField(Contraseña, 30);
+        PassContraseña = new PlaceholderPassField("******", 30);
         PassContraseña.setFont(new Font("Poppins", Font.PLAIN, 12));
         PassContraseña.setBackground(Color.WHITE);
         PassContraseña.setBounds(400, 145, 200, 30);
@@ -154,16 +173,58 @@ public class Usuario extends JPanel {
         });
 
         //Panel de notificaciones
-        JPanel notificaciones = new JPanel();
+        notificaciones = new JPanel();
         notificaciones.setLayout(new BoxLayout(notificaciones, BoxLayout.Y_AXIS));
+        notificaciones.setAlignmentY(Component.TOP_ALIGNMENT);
         notificaciones.setBounds(0,300,650,300);
         notificaciones.setBackground(Color.white);
 
+        //Muestra las notificaciones
+        cargarNotificaciones();
+        
+        //Funcionalidad de todos los botones     
+        //Alternan entre el panel de ver y de editar usuario
+        btnEditar.addActionListener(e -> {
+            verUsuario.setVisible(false);
+            notificaciones.setVisible(false);
+            editarUsuario.setVisible(true);
+        });
+
+        btnCancelar.addActionListener(e -> {
+            texUsuario.resetPlaceholder();
+            
+            verUsuario.setVisible(true);
+            notificaciones.setVisible(true);
+            editarUsuario.setVisible(false);
+        });
+
+        btnGuardar.addActionListener(e -> {
+            validarDatosUsuario();
+        });
+
+        btnEliminar.addActionListener(e -> {
+            new confirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta",
+                () -> Peticiones.eliminarUsuario(Sesion.getUsuario()));
+        });
+        
+        JScrollPane scrollPane = new CustomScroll(notificaciones);
+        scrollPane.setBounds(0,300,640,260);
+        
+        //Agrega los paneles al panel principal
+        add(verUsuario);
+        add(scrollPane);
+        add(editarUsuario);
+    }
+    
+    public void cargarNotificaciones(){
+        notificaciones.removeAll();
+        
         //Creación de los elementos
         ArrayList<Notificacion> notificacionesList = Peticiones.obtenerNotificaciones(Sesion.getIdUsuario());
         
         for(Notificacion notificacion : notificacionesList){
             JPanel fila = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+            fila.setMaximumSize(new Dimension(Short.MAX_VALUE, 80));
             fila.setBackground(Color.white);
             fila.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -183,6 +244,22 @@ public class Usuario extends JPanel {
 
             JLabel borrar = new JLabel(new FlatSVGIcon("imagenes/borrar.svg", 30, 30));
             borrar.setBounds(350, 20, 30, 30);
+            
+            borrar.addMouseListener(new MouseAdapter(){
+                //Funcionalidad al clickear
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    Peticiones.eliminarNotificacion(notificacion.getId(), instancia);
+                }
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    borrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    borrar.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
 
             card.add(icono);
             card.add(mensaje);
@@ -191,37 +268,8 @@ public class Usuario extends JPanel {
             
             notificaciones.add(fila);
         }
-        
-        //Funcionalidad de todos los botones     
-        
-        //Alternan entre el panel de ver y de editar usuario
-        btnEditar.addActionListener(e -> {
-            verUsuario.setVisible(false);
-            notificaciones.setVisible(false);
-            editarUsuario.setVisible(true);
-        });
-
-        btnCancelar.addActionListener(e -> {
-            verUsuario.setVisible(true);
-            notificaciones.setVisible(true);
-            editarUsuario.setVisible(false);
-        });
-
-        btnGuardar.addActionListener(e -> {
-            validarDatosUsuario();
-        });
-
-        btnEliminar.addActionListener(e -> {
-            new confirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta");
-        });
-        
-        JScrollPane scrollPane = new CustomScroll(notificaciones);
-        scrollPane.setBounds(0,300,640,260);
-        
-        //Agrega los paneles al panel principal
-        add(verUsuario);
-        add(scrollPane);
-        add(editarUsuario);
+        notificaciones.revalidate();
+        notificaciones.repaint();
     }
 
     //Valida los datos al actualizar
@@ -229,12 +277,12 @@ public class Usuario extends JPanel {
         boolean correcto = true;
 
         if(texNombre.getText().equals("")){texNombre.setForeground(Color.red); correcto=false;}
-        if(new String(PassContraseña.getPassword()).trim().isEmpty()){PassContraseña.setForeground(Color.red); correcto=false; }
 
         if(!correcto) return;
 
         String nombre = texNombre.getText().trim();
         String contraseña = new String (PassContraseña.getPassword()).trim();
+        if(contraseña.isEmpty()){contraseña = contraseñaActual;}
 
         if(!nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")){
             texNombre.setForeground(Color.red);

@@ -47,7 +47,7 @@ public class CRUD_Libro extends JPanel{
         Autor.setFont(new Font("Poppins", Font.PLAIN, 12));
         Autor.setBounds(290, 90, 200, 30);
 
-        Año = new PlaceholderTextField("Año", 5);
+        Año = new PlaceholderTextField("Año", 6);
         Año.setFont(new Font("Poppins", Font.PLAIN, 12));
         Año.setBounds(290, 130, 200, 30);
         

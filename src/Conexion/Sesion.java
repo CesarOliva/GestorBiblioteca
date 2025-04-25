@@ -8,19 +8,16 @@ public class Sesion {
     private static Conexion conectar = Conexion.getInstance();
     
     private static int idUsuario;
-    private static String nombre;
-    private static String usuario;
-    private static String Contraseña;
-    private static String fechaCreacion;
-    private static String foto;
+    private static String nombre, usuario, Contraseña, fechaCreacion, foto, tipoUsuario;
 
     public static void iniciarSesion(int IdUsuario){
         idUsuario = IdUsuario;
+        
         try {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement busquedaUsuario = conexion.prepareStatement("select Nombre, Usuario, Contraseña, FechaCreacion, Foto from usuarios where IdUsuario='"+idUsuario+"'");
+            PreparedStatement busquedaUsuario = conexion.prepareStatement("select Nombre, Usuario, Contraseña, FechaCreacion, Foto, TipoUsuario from usuarios where IdUsuario='"+idUsuario+"'");
             ResultSet consultaUsuario = busquedaUsuario.executeQuery();
 
             if (consultaUsuario.next()) {
@@ -29,6 +26,7 @@ public class Sesion {
                 Contraseña = consultaUsuario.getString("Contraseña");
                 fechaCreacion = consultaUsuario.getString("FechaCreacion");
                 foto = consultaUsuario.getString("Foto");
+                tipoUsuario = consultaUsuario.getString("TipoUsuario");
             }
 
             conectar.cerrarConexion();
@@ -49,6 +47,8 @@ public class Sesion {
     public static String getFechaCreacion() { return fechaCreacion; }
     
     public static String getFoto() { return foto; }
+    
+    public static String getTipo() { return tipoUsuario; }
 
     public static void cerrarSesion(){
         idUsuario = 0;

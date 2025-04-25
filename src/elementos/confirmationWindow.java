@@ -5,13 +5,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
 import Conexion.Sesion;
-import Conexion.Peticiones;
 
 //Clase confirmationWindow extendida de JFrame. Frame personalizado.
 public class confirmationWindow extends JFrame{
     JTextField confirmacion;
     
-    public confirmationWindow(String text){
+    public confirmationWindow(String text, Runnable accion){
         //Configuración de la ventana 
         setTitle("Confirmación");
         setSize(300, 180);
@@ -46,7 +45,8 @@ public class confirmationWindow extends JFrame{
         
         button.addActionListener((ActionEvent e)->{
             if(getText().equals(Sesion.getContraseña())){
-                Peticiones.eliminarUsuario(Sesion.getUsuario());
+                //Ejecuta la función
+                accion.run();
                 dispose();
             }
             else{

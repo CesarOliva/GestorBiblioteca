@@ -9,7 +9,7 @@ public class Conexion {
     private static Conexion instancia;
     
     //Credenciales de la base de datos
-    private static final String URL = "jdbc:mysql://localhost/gestorbiblioteca";
+    private static final String URL = "jdbc:mysql://localhost/bd_gestorbiblioteca";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
     
