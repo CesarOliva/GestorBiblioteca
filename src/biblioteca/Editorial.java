@@ -23,7 +23,7 @@ public class Editorial extends JPanel {
     private JPanel panelLibros, datos, panelEditar;
     private JScrollPane scrollPane;
     private JLabel fotoEditorial;
-    
+    private int offset=0, limite=10, idEditorial;    
     private String editorial;
     
     public Editorial(int idEditorial, String editorial, String descripcion, String foto) {
@@ -32,8 +32,14 @@ public class Editorial extends JPanel {
         setBackground(Color.white);
         
         this.editorial = editorial;
+        this.idEditorial = idEditorial;
         
-        //Panel de datos
+        //Carga el panel de datos como primera vista
+        mostrarPanelDatos(idEditorial, editorial, descripcion, foto);
+    }
+    
+    private void mostrarPanelDatos(int idEditorial, String editorial, String descripcion, String foto){
+               //Panel de datos
         datos = new JPanel(null);
         datos.setPreferredSize(new Dimension(620, 300));
         datos.setMinimumSize(new Dimension(620, 300));
@@ -81,7 +87,7 @@ public class Editorial extends JPanel {
         }
         
         editar.addActionListener(e->{
-            mostrarEditar(idEditorial, editorial, descripcion, foto);
+            mostrarPanelEditar(idEditorial, editorial, descripcion, foto);
         });
 
         //Se agregan los elementos
@@ -92,13 +98,13 @@ public class Editorial extends JPanel {
         
         //Panel de libros
         panelLibros = new JPanel();
-        panelLibros.setLayout(new BoxLayout(panelLibros, BoxLayout.Y_AXIS));
+        panelLibros.setLayout(new BoxLayout(panelLibros, BoxLayout.Y_AXIS));        
         panelLibros.setBackground(Color.white);
         
         panelLibros.add(datos);
 
         // Cargar los 10 libros mas recientes al iniciar
-        mostrarLibros(Peticiones.librosEditorial(idEditorial));
+        cargarLibros(Peticiones.librosEditorial(idEditorial, limite, offset));
         
         //Scrollpane del panelLibros
         scrollPane = new CustomScroll(panelLibros);
@@ -112,7 +118,7 @@ public class Editorial extends JPanel {
         scrollPane.setVisible(true);
     }
     
-    private void mostrarEditar(int IdEditorial, String editorial, String descripcion, String foto){
+    private void mostrarPanelEditar(int IdEditorial, String editorial, String descripcion, String foto){
         scrollPane.setVisible(false);
         
         panelEditar.setPreferredSize(new Dimension(620, 300));
@@ -189,7 +195,11 @@ public class Editorial extends JPanel {
     }
     
     //Mostrar todos los libros o la busqueda
-    private void mostrarLibros(ArrayList<LibroBusqueda> libros) {
+    private void cargarLibros(ArrayList<LibroBusqueda> libros) {
+        panelLibros.removeAll();
+        
+        panelLibros.add(datos);        
+        
         //Obtiene la lista de los libros
         for(LibroBusqueda libro : libros){
             //Fila de cada libro
@@ -274,7 +284,57 @@ public class Editorial extends JPanel {
             fila.add(card);
             panelLibros.add(fila);
         }
-                
+        
+        //Panel de paginacion
+        JPanel paginacion = new JPanel();
+        paginacion.setLayout(null);
+        paginacion.setBackground(Color.white);
+        paginacion.setPreferredSize(new Dimension(550, 60));
+        
+        //Botones para paginación      
+        JButton anterior;
+        anterior = new RoundedButton("Anterior");
+        anterior.setForeground(Color.white);
+        anterior.setBackground(new Color(100, 149, 237));
+        anterior.setFont(new Font("Poppins", Font.PLAIN, 12));
+        anterior.setBounds(65, 0, 100, 40);
+        
+        if(offset>0){
+            anterior.addActionListener(e->{
+                //Posición de busqueda de libro
+               offset-=limite;
+               if(offset<0){
+                   offset=0;
+               }
+               
+               cargarLibros(Peticiones.librosEditorial(idEditorial, limite, offset));
+            });            
+        }
+        
+        JButton siguiente = new RoundedButton("Siguiente");
+        siguiente.setForeground(Color.white);
+        siguiente.setBackground(new Color(100, 149, 237));
+        siguiente.setFont(new Font("Poppins", Font.PLAIN, 12));
+        siguiente.setBounds(465, 0, 100, 40);
+        
+        siguiente.addActionListener(e->{
+            //Posición de busqueda de libro
+            offset+=limite;
+            cargarLibros(Peticiones.librosEditorial(idEditorial, limite, offset));
+        });
+        
+        // Desactiva botón anterior
+        anterior.setEnabled(offset > 0);
+
+        // Desactiva botón siguiente
+        siguiente.setEnabled(offset + limite < Peticiones.contarLibrosEditorial(idEditorial));
+        
+        //Agregar los botones al panel de paginacion y el panel al panel de resultados
+        paginacion.add(siguiente);
+        paginacion.add(anterior);
+        
+        panelLibros.add(paginacion);
+        
         panelLibros.revalidate();
         panelLibros.repaint();   
         
@@ -282,7 +342,7 @@ public class Editorial extends JPanel {
             //Manda el scroll al inicio
             scrollPane.getVerticalScrollBar().setValue(0);
         });
-    }    
+    }
     
     //Metodo para escoger la nueva imagen
     private void chooseFile() {

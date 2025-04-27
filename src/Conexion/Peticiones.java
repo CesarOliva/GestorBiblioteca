@@ -184,7 +184,7 @@ public class Peticiones {
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
-            PreparedStatement busquedaNoti = conexion.prepareStatement("select * from notificaciones where IdUsuario='"+IdUsuario+"' order by IdNotificacion desc ");
+            PreparedStatement busquedaNoti = conexion.prepareStatement("select * from notificaciones where IdUsuario='"+IdUsuario+"' order by IdNotificacion desc");
             ResultSet consultaNoti = busquedaNoti.executeQuery();
             
             int id=0;
@@ -761,14 +761,16 @@ public class Peticiones {
     
     
     //Obtener los libros del autor
-    public static ArrayList<LibroBusqueda> librosAutor(int idAutor, String autor){
+    public static ArrayList<LibroBusqueda> librosAutor(int idAutor, String autor, int limite, int offset){
         ArrayList<LibroBusqueda> libros = new ArrayList<>();
         
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
 
-            PreparedStatement librosAutor = conexion.prepareStatement("select * from libros where IdAutor='"+idAutor+"'");
+            PreparedStatement librosAutor = conexion.prepareStatement("select * from libros where IdAutor='"+idAutor+"' order by IdLibro desc limit ? offset ?");
+            librosAutor.setInt(1, limite);
+            librosAutor.setInt(2, offset);
             ResultSet consultaLibro = librosAutor.executeQuery();
 
             while(consultaLibro.next()){
@@ -785,7 +787,33 @@ public class Peticiones {
         }
         return libros;
     }
+    
+    
+    
+        //Contar la cantidad de libros poren la base de datos
+    public static int contarLibrosAutor(int IdAutor) {
+        int total = 0;
+        
+        try {
+            Connection conexion = conectar.conectar();
+            
+            //Cuenta los elementos de la tabla de libros
+            PreparedStatement busquedaLibros = conexion.prepareStatement("select count(*) as Total from libros where IdAutor='"+IdAutor+"'");
+            ResultSet consultaLibros = busquedaLibros.executeQuery();
+            if (consultaLibros.next()) {
+                total = consultaLibros.getInt("Total");
+            }
 
+            //Cierra la conexión
+            conectar.cerrarConexion();
+        } catch (Exception error) {
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");
+        }
+        return total;
+    }
+
+    
     
     
     //Obtener los datos del autor
@@ -815,14 +843,17 @@ public class Peticiones {
     
     
     //Obtener los libros del autor
-    public static ArrayList<LibroBusqueda> librosEditorial(int idEditorial){
+    public static ArrayList<LibroBusqueda> librosEditorial(int idEditorial, int limite, int offset){
         ArrayList<LibroBusqueda> libros = new ArrayList<>();
         
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
 
-            PreparedStatement librosEditorial = conexion.prepareStatement("select * from libros where IdEditorial='"+idEditorial+"'");
+            PreparedStatement librosEditorial = conexion.prepareStatement("select * from libros where IdEditorial='"+idEditorial+"' order by IdLibro desc limit ? offset ?");
+            librosEditorial.setInt(1, limite);
+            librosEditorial.setInt(2, offset);
+            
             ResultSet consultaLibro = librosEditorial.executeQuery();
 
             while(consultaLibro.next()){
@@ -846,8 +877,32 @@ public class Peticiones {
         }
         return libros;
     }
+    
+    
+    
+    //Contar la cantidad de libros poren la base de datos
+    public static int contarLibrosEditorial(int IdEditorial) {
+        int total = 0;
+        
+        try {
+            Connection conexion = conectar.conectar();
+            
+            //Cuenta los elementos de la tabla de libros
+            PreparedStatement busquedaLibros = conexion.prepareStatement("select count(*) as Total from libros where IdEditorial='"+IdEditorial+"'");
+            ResultSet consultaLibros = busquedaLibros.executeQuery();
+            if (consultaLibros.next()) {
+                total = consultaLibros.getInt("Total");
+            }
 
-
+            //Cierra la conexión
+            conectar.cerrarConexion();
+        } catch (Exception error) {
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente");
+        }
+        return total;
+    }
+    
 
     
     //Elimina el libro
