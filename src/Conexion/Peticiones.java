@@ -184,8 +184,7 @@ public class Peticiones {
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
-
-            PreparedStatement busquedaNoti = conexion.prepareStatement("select * from notificaciones where IdUsuario='"+IdUsuario+"'");
+            PreparedStatement busquedaNoti = conexion.prepareStatement("select * from notificaciones where IdUsuario='"+IdUsuario+"' order by IdNotificacion desc ");
             ResultSet consultaNoti = busquedaNoti.executeQuery();
             
             int id=0;
@@ -273,12 +272,17 @@ public class Peticiones {
             //Inicia la conexion
             Connection conexion = conectar.conectar();
             
+            //Elimina las notificaciones 
+            PreparedStatement eliminarNotificaciones = conexion.prepareStatement("delete from notificaciones where IdUsuario='"+Sesion.getIdUsuario()+"'");
+            eliminarNotificaciones.executeUpdate();
+            
+            //Elimina el usuario
             PreparedStatement eliminarUsuario = conexion.prepareStatement("delete from usuarios where Usuario='"+usuario+"'");
 
             int filasAfectadas = eliminarUsuario.executeUpdate();
 
             if (filasAfectadas > 0) {
-                //Muestra qye eliminó el usuario
+                //Muestra que eliminó el usuario
                 new WindowMessage("Usuario eliminado correctamente.");
                 biblioteca.App.getInstancia().cerrar();
                 new biblioteca.LogIn();
@@ -605,7 +609,7 @@ public class Peticiones {
             Connection conexion = conectar.conectar();
             
             PreparedStatement busquedaLibro = conexion.prepareStatement("select l.IdLibro, l.Titulo, a.Nombre AS Autor, l.Descripcion, l.Portada " +
-                     "from libros l inner join autores a on l.IdAutor = a.IdAutor where l.Titulo like ? or a.Nombre like ?");
+                     "from libros l inner join autores a on l.IdAutor = a.IdAutor where l.Titulo like ? or a.Nombre like ? limit 10");
             busquedaLibro.setString(1, "%"+texto+"%");
             busquedaLibro.setString(2, "%"+texto+"%");
 
@@ -632,8 +636,10 @@ public class Peticiones {
         return libros;
     }
     
+    
+    
     //Prestamo de libros
-    public static void PrestarLibroIndividual(int IdUsuario, int IdLibro, String titulo){
+    public static void PrestamoLibro(int IdUsuario, int IdLibro, String titulo){
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
@@ -670,6 +676,60 @@ public class Peticiones {
             new WindowError("Ocurrió un error. Intente nuevamente");
             System.out.println("Error: "+error);
         }
+    }
+    
+    
+    
+    //Obtener los prestamos de usuarios
+    public static ArrayList<PrestamoBusqueda> obtenerPrestamos(int IdUsuario){
+        ArrayList<PrestamoBusqueda> libros = new ArrayList<>();
+        try{
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement busquedaPrestamos = conexion.prepareStatement("select * from prestamos where IdSocio='"+IdUsuario+"' order by IdPrestamo desc");
+            ResultSet consultaPrestamos = busquedaPrestamos.executeQuery();
+            
+            while(consultaPrestamos.next()){
+                int IdLibro = consultaPrestamos.getInt("IdLibro");
+                
+                PreparedStatement busquedaLibro = conexion.prepareStatement("select * from libros where IdLibro='"+IdLibro+"'");
+                ResultSet consultaLibro = busquedaLibro.executeQuery();
+                
+                String titulo="", portada="", autor="";
+                if(consultaLibro.next()){
+                    titulo = consultaLibro.getString("Titulo");
+                    portada = consultaLibro.getString("Portada");
+                    int IdAutor = consultaLibro.getInt("IdAutor");
+                    
+                    PreparedStatement busquedaAutor = conexion.prepareStatement("select * from autores where IdAutor='"+IdAutor+"'");
+                    ResultSet consultaAutor = busquedaAutor.executeQuery();
+                    
+                    if(consultaAutor.next()){
+                        autor = consultaAutor.getString("Nombre");
+                    }
+                }
+                
+                int IdPrestamo = consultaPrestamos.getInt("IdPrestamo");
+                
+                Date DatePrestamo = consultaPrestamos.getDate("FechaPrestamo");
+                LocalDate fechaPrestamo = DatePrestamo != null ? DatePrestamo.toLocalDate() : null;
+                
+                Date DateVuelta = consultaPrestamos.getDate("FechaVuelta");
+                LocalDate fechaDevolucion = DateVuelta != null ? DateVuelta.toLocalDate() : null;
+                boolean devuelto = consultaPrestamos.getBoolean("Devuelto");
+                
+                libros.add(new PrestamoBusqueda(IdLibro, titulo, autor, portada, IdPrestamo, fechaPrestamo, fechaDevolucion, devuelto));
+            }
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        }catch(Exception error){
+            new WindowError("Ocurrió un error. Intente nuevamente");
+            System.out.println("Error: "+error);
+        }
+        
+        return libros;
     }
     
     
@@ -874,32 +934,34 @@ public class Peticiones {
     
     
     
-    //METODOS EXTRA
-    
-    //Hace la conversión de imagen a byte
-    public static byte[] convertirImagenABytes(String ruta) {
+    //Actualizar libro
+    public static void actualizarLibro(int IdLibro, String isbn, String titulo, String autor, String portada, int año, String editorial, String genero, int paginas, String descripcion, String admin){
         try{
-            InputStream input = Peticiones.class.getResourceAsStream(ruta);
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
             
-            //Si no encuentra la imagen
-            if (input == null) {
-                System.out.println("No se encontró la imagen en: " + ruta);
-                return null;
-            }
+            PreparedStatement actualizarLibro = conexion.prepareStatement("update libros set ISBN=?, Titulo=?, Año=?, Paginas=?, Descripcion=? where idLibro=?");
+            
+            actualizarLibro.setString(1, isbn);
+            actualizarLibro.setString(2, titulo);
+            actualizarLibro.setInt(3, año);
+            actualizarLibro.setInt(4, paginas);
+            actualizarLibro.setString(5, descripcion);
+            actualizarLibro.setInt(6, IdLibro);
 
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            byte[] datos = new byte[1024];
-            int n;
-            while ((n = input.read(datos)) != -1) {
-                buffer.write(datos, 0, n);
-            }
-
-            return buffer.toByteArray(); // Aquí tienes la imagen como byte[]
-        } catch (Exception error) {
+            actualizarLibro.executeUpdate();
+            
+            new WindowMessage("Datos actualizados correctamente");
+            String añoString = ""+año;
+            String paginasString = ""+paginas;
+            
+            App.cambiarVista(new LibroIndividual(IdLibro, isbn, titulo, autor, portada, añoString, editorial, genero, paginasString, descripcion, admin), null);
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();            
+        }catch(Exception error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
-            return null;
+            new WindowError("Ocurrió un error. Intente nuevamente");            
         }
     }
-
 }

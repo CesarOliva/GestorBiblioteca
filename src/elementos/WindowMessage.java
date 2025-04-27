@@ -33,7 +33,7 @@ public class WindowMessage extends JFrame {
         message.setContentType("text/html");
         message.setText("<html>"
                 + "<p style='font-family:Inter; font-size:10px; font-weight:400; color:#000; text-align:center'>"+text+"</p>");
-        message.setBounds(100, 5, 150, 80);
+        message.setBounds(100, 5, 150, 85);
         message.setEditable(false);
         message.setFocusable(false);
         message.setBackground(Color.white);

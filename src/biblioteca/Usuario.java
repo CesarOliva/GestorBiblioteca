@@ -18,7 +18,7 @@ import elementos.RoundedButton;
 import elementos.PlaceholderTextField;
 import elementos.PlaceholderPassField;
 import elementos.WindowError;
-import elementos.confirmationWindow;
+import elementos.ConfirmationWindow;
 import elementos.CustomScroll;
 
 //Clase Usuario extendida de JPanel. Panel personalizado
@@ -52,8 +52,6 @@ public class Usuario extends JPanel {
 
         //Creación de los elementos
         fotoUsuario = new JLabel();
-        fotoUsuario.setBounds(50, 55, 200, 200);
-        
         
         //Intente cargar la imagen, de lo contrario cargar una imagen default
         File archivo = new File(foto);
@@ -65,36 +63,35 @@ public class Usuario extends JPanel {
                         .getScaledInstance(200, 200, Image.SCALE_SMOOTH);
             fotoUsuario.setIcon(new ImageIcon(imagen));
         }
-        fotoUsuario.setBounds(50, 55, 200, 200);
+        fotoUsuario.setBounds(70, 55, 200, 200);
 
-        
         lblNombre = new JLabel("Nombre: " + Nombre);
         lblNombre.setFont(new Font("Poppins", Font.PLAIN, 14));
-        lblNombre.setBounds(400, 55, 400, 30);
+        lblNombre.setBounds(300, 70, 400, 30);
 
         JLabel lblUsuario = new JLabel("Usuario: " + Usuario);
         lblUsuario.setFont(new Font("Poppins", Font.PLAIN, 14));
-        lblUsuario.setBounds(400, 100, 400, 30);
+        lblUsuario.setBounds(300, 115, 400, 30);
 
         JLabel lblFecha = new JLabel("Usuario desde: " + Fecha);
         lblFecha.setFont(new Font("Poppins", Font.PLAIN, 14));
-        lblFecha.setBounds(400, 145, 400, 30);
+        lblFecha.setBounds(300, 160, 400, 30);
 
         JLabel lblContraseña = new JLabel("Contraseña: " + "******");
         lblContraseña.setFont(new Font("Poppins", Font.PLAIN, 14));        
-        lblContraseña.setBounds(400, 190, 400, 30);
+        lblContraseña.setBounds(300, 205, 400, 30);
         
         JButton btnEditar = new RoundedButton("Editar");
-        btnEditar.setFont(new Font("Poppins", Font.PLAIN, 15));
+        btnEditar.setFont(new Font("Poppins", Font.PLAIN, 14));
         btnEditar.setForeground(Color.WHITE);
         btnEditar.setBackground(new Color(100, 149, 237));
-        btnEditar.setBounds(100, 260, 150, 30);
+        btnEditar.setBounds(70, 270, 95, 30);
 
         JButton btnEliminar = new RoundedButton("Eliminar");
-        btnEliminar.setFont(new Font("Poppins", Font.PLAIN, 15));
+        btnEliminar.setFont(new Font("Poppins", Font.PLAIN, 14));
         btnEliminar.setForeground(Color.WHITE);
         btnEliminar.setBackground(Color.red);
-        btnEliminar.setBounds(300, 260, 150, 30);
+        btnEliminar.setBounds(175, 270, 95, 30);
         
         //Se agregan los elementos al panel de verUsuario
         verUsuario.add(fotoUsuario);
@@ -108,51 +105,53 @@ public class Usuario extends JPanel {
         
         //Panel de editar usuario
         editarUsuario = new JPanel(null);
-        editarUsuario.setBounds(0,0,650,320);
+        editarUsuario.setBounds(0,0,650,300);
         editarUsuario.setBackground(Color.white);
         editarUsuario.setVisible(false);
        
         // Creación de los elementos        
         fotoUsuario = new JLabel(new ImageIcon(imagen));
-        fotoUsuario.setBounds(50, 55, 200, 200);
+        fotoUsuario.setBounds(70, 55, 200, 200);
         
-        JLabel nombreEdit = new JLabel("Nombre: ");
-        nombreEdit.setBounds(340,55, 200, 30);
+        JLabel nombreEdit = new JLabel("Nombre:");
+        nombreEdit.setBounds(300, 95, 100, 30);
+        nombreEdit.setFont(new Font("Poppins", Font.PLAIN, 14));
 
         texNombre = new PlaceholderTextField(Nombre, 100);
-        texNombre.setFont(new Font("Poppins", Font.PLAIN, 12));
-        texNombre.setBounds(400, 55, 200, 30);
+        texNombre.setText(Nombre);
+        texNombre.setFont(new Font("Poppins", Font.PLAIN, 14));
+        texNombre.setBounds(400, 95, 200, 30);
 
-        JLabel usuarioEdit = new JLabel("Usuario: ");
-        usuarioEdit.setBounds(340,100, 200, 30);
+        JLabel usuarioEdit = new JLabel("Usuario:");
+        usuarioEdit.setBounds(300, 140, 200, 30);
+        usuarioEdit.setFont(new Font("Poppins", Font.PLAIN, 14));
         
         texUsuario = new PlaceholderTextField(Usuario, 100);
-        texUsuario.setFont(new Font("Poppins", Font.PLAIN, 12));
+        texUsuario.setFont(new Font("Poppins", Font.PLAIN, 14));
         texUsuario.setBackground(Color.WHITE);
-        texUsuario.setBounds(400, 100, 200, 30);
+        texUsuario.setBounds(400, 140, 200, 30);
         texUsuario.setEnabled(false);
 
         JLabel contraEdit = new JLabel("Contraseña: ");
-        contraEdit.setBounds(330,145,200,30);
+        contraEdit.setFont(new Font("Poppins", Font.PLAIN, 14));
+        contraEdit.setBounds(300, 185, 400, 30);
 
         PassContraseña = new PlaceholderPassField("******", 30);
-        PassContraseña.setFont(new Font("Poppins", Font.PLAIN, 12));
+        PassContraseña.setFont(new Font("Poppins", Font.PLAIN, 14));
         PassContraseña.setBackground(Color.WHITE);
-        PassContraseña.setBounds(400, 145, 200, 30);
+        PassContraseña.setBounds(400, 185, 200, 30);
         
         JButton btnGuardar = new RoundedButton("Guardar");
-        btnGuardar.setFont(new Font("Poppins", Font.PLAIN, 15));
+        btnGuardar.setFont(new Font("Poppins", Font.PLAIN, 14));
         btnGuardar.setBackground(new Color(100, 149, 237));
         btnGuardar.setForeground(Color.white);
-        btnGuardar.setBounds(100, 260, 150, 30);
-        editarUsuario.add(btnGuardar);
+        btnGuardar.setBounds(70, 270, 95, 30);
 
         JButton btnCancelar = new RoundedButton("Cancelar");
-        btnCancelar.setFont(new Font("Poppins", Font.PLAIN, 15));
+        btnCancelar.setFont(new Font("Poppins", Font.PLAIN, 14));
         btnCancelar.setBackground(Color.red);
         btnCancelar.setForeground(Color.white);
-        btnCancelar.setBounds(300, 260, 150, 30);
-        editarUsuario.add(btnCancelar);
+        btnCancelar.setBounds(174, 270, 96, 30);
 
         //Se agregan los elementos al panel de editarUsuario
         editarUsuario.add(fotoUsuario);
@@ -162,6 +161,8 @@ public class Usuario extends JPanel {
         editarUsuario.add(texUsuario);
         editarUsuario.add(contraEdit);
         editarUsuario.add(PassContraseña);
+        editarUsuario.add(btnGuardar);
+        editarUsuario.add(btnCancelar);
 
         
         //Funcionalidad al clickear la foto
@@ -178,7 +179,7 @@ public class Usuario extends JPanel {
         notificaciones.setAlignmentY(Component.TOP_ALIGNMENT);
         notificaciones.setBounds(0,300,650,300);
         notificaciones.setBackground(Color.white);
-
+        
         //Muestra las notificaciones
         cargarNotificaciones();
         
@@ -191,7 +192,8 @@ public class Usuario extends JPanel {
         });
 
         btnCancelar.addActionListener(e -> {
-            texUsuario.resetPlaceholder();
+            texNombre.setText(Usuario);
+            texNombre.resetPlaceholder();
             
             verUsuario.setVisible(true);
             notificaciones.setVisible(true);
@@ -203,7 +205,7 @@ public class Usuario extends JPanel {
         });
 
         btnEliminar.addActionListener(e -> {
-            new confirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta",
+            new ConfirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta",
                 () -> Peticiones.eliminarUsuario(Sesion.getUsuario()));
         });
         
@@ -229,21 +231,21 @@ public class Usuario extends JPanel {
             fila.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             JPanel card = new JPanel(null);
-            card.setBackground(Color.lightGray);
+            card.setBackground(new Color(217, 217, 217));
             card.setPreferredSize(new Dimension(500, 60));
             card.setMaximumSize(new Dimension(500, 60));
             card.setMinimumSize(new Dimension(500, 60));
             card.setBounds(30, 50, 500, 60);
 
             JLabel icono = new JLabel(new FlatSVGIcon("imagenes/notificacion.svg", 40, 40));
-            icono.setBounds(0,10,40,40);
+            icono.setBounds(10,10,40,40);
 
             JLabel mensaje = new JLabel(notificacion.getMensaje());
-            mensaje.setBounds(50, 30, 300, 20);
+            mensaje.setBounds(60, 20, 400, 20);
             mensaje.setFont(new Font("Poppins", Font.PLAIN, 14));
 
             JLabel borrar = new JLabel(new FlatSVGIcon("imagenes/borrar.svg", 30, 30));
-            borrar.setBounds(350, 20, 30, 30);
+            borrar.setBounds(460, 15, 30, 30);
             
             borrar.addMouseListener(new MouseAdapter(){
                 //Funcionalidad al clickear

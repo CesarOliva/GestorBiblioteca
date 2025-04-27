@@ -62,7 +62,7 @@ public class Editorial extends JPanel {
         txtBiografia.setLineWrap(true);
         txtBiografia.setWrapStyleWord(true);
         txtBiografia.setFont(new Font("Poppins", Font.PLAIN, 12));
-        txtBiografia.setBounds(290, 90, 250, 300);
+        txtBiografia.setBounds(285, 80, 280, 300);
         txtBiografia.setEditable(false);
         txtBiografia.setFocusable(false);
         txtBiografia.setBackground(Color.white);
@@ -116,6 +116,7 @@ public class Editorial extends JPanel {
         scrollPane.setVisible(false);
         
         panelEditar.setPreferredSize(new Dimension(620, 300));
+        panelEditar.setBackground(Color.white);
         
         fotoEditorial = new JLabel();        
         //Intente cargar la imagen, de lo contrario cargar una imagen default
@@ -140,6 +141,7 @@ public class Editorial extends JPanel {
 
         PlaceholderTextField Nombre = new PlaceholderTextField(editorial, 100);
         Nombre.setText(editorial);
+        Nombre.setEnabled(false);
         Nombre.setFont(new Font("Poppins", Font.PLAIN, 12));
         Nombre.setBounds(290, 50, 200, 30);
 
@@ -147,9 +149,9 @@ public class Editorial extends JPanel {
         txtDesc.setLineWrap(true);
         txtDesc.setWrapStyleWord(true);
         txtDesc.setFont(new Font("Poppins", Font.PLAIN, 12));
-        txtDesc.setBounds(290, 90, 250, 300);
+        txtDesc.setBounds(290, 90, 280, 300);
         txtDesc.setEditable(true);
-        txtDesc.setBackground(Color.white);
+        txtDesc.setBackground(Color.lightGray);
         
         JButton actualizar = new RoundedButton("Actualizar");
         actualizar.setFont(new Font("Poppins", Font.PLAIN, 15));
@@ -196,41 +198,48 @@ public class Editorial extends JPanel {
             fila.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             //Configuración del panel
-            JPanel card = new JPanel();
-            card.setLayout(null);
-            card.setForeground(Color.gray);
+            JPanel card = new JPanel(null);
             card.setPreferredSize(new Dimension(500, 220));
             card.setMinimumSize(new Dimension(500, 220));
             card.setBounds(50, 0, 500, 220);
 
             //Creación de los elementos
             String portada = libro.getPortada();
-            Image imagen = new ImageIcon(portada).getImage().getScaledInstance(133, 200, Image.SCALE_SMOOTH);
-            JLabel Portada = new JLabel(new ImageIcon(imagen));
-            Portada.setBounds(10,12,133,200);
-
+            
+            //Intente cargar la imagen, de lo contrario cargar una imagen default
+            File archivo = new File(portada);
+            JLabel Portada = new JLabel();
+            if (archivo.exists()) {
+                Image imagen = new ImageIcon(portada).getImage().getScaledInstance(133, 200, Image.SCALE_SMOOTH);
+                Portada.setIcon(new ImageIcon(imagen));
+            }else{
+                Image imagen = new ImageIcon(getClass().getResource("/imagenes/addCover.png")).getImage()
+                            .getScaledInstance(133, 200, Image.SCALE_SMOOTH);
+                Portada.setIcon(new ImageIcon(imagen));
+            }
+            Portada.setBounds(10,10,133,200);
+            
             JLabel Titulo = new JLabel(libro.getTitulo());
             Titulo.setFont(new Font("Poppins", Font.PLAIN, 14));        
-            Titulo.setBounds(150, 0, 200, 30);
+            Titulo.setBounds(153, 10, 400, 20);
 
             JLabel Autor = new JLabel(libro.getAutor());
             Autor.setFont(new Font("Poppins", Font.BOLD, 14));
-            Autor.setBounds(150, 30, 200, 30);
+            Autor.setBounds(153, 30, 200, 30);
 
             JTextArea Descripcion = new JTextArea(libro.getDescripcion());
             Descripcion.setFont(new Font("Poppins", Font.PLAIN, 12));
             Descripcion.setEditable(false);
             Descripcion.setFocusable(false);
-            Descripcion.setBackground(Color.white);
             Descripcion.setLineWrap(true); // Salto de línea automático
             Descripcion.setWrapStyleWord(true); // Corta palabras completas
-            Descripcion.setBounds(150, 60, 280, 60);
+            Descripcion.setBounds(148, 57, 330, 120);
 
             JButton verMas = new RoundedButton("Ver mas");
             verMas.setForeground(Color.white);
             verMas.setBackground(new Color(100, 149, 237));
             verMas.setFont(new Font("Poppins", Font.PLAIN, 14));
-            verMas.setBounds(150, 120, 100, 30);
+            verMas.setBounds(153, 180, 100, 30);
 
             int idLibro = libro.getId();
             verMas.addActionListener(e -> {
@@ -273,8 +282,7 @@ public class Editorial extends JPanel {
             //Manda el scroll al inicio
             scrollPane.getVerticalScrollBar().setValue(0);
         });
-    }
-    
+    }    
     
     //Metodo para escoger la nueva imagen
     private void chooseFile() {
@@ -288,7 +296,7 @@ public class Editorial extends JPanel {
         
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoSeleccionado = fileChooser.getSelectedFile();
-            String destinoPath = "C:/xampp/htdocs/Imagenes/"+editorial+".jpg";
+            String destinoPath = "C:/xampp/htdocs/Imagenes/"+editorial.trim().replace(" ","")+".jpg";
             File destino = new File(destinoPath);
             
             try {

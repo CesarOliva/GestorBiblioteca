@@ -39,11 +39,11 @@ public class CRUD_Libro extends JPanel{
         Portada = new JLabel(new ImageIcon(imgEscalada));
         Portada.setBounds(50,50,200,300);
 
-        Titulo = new PlaceholderTextField("Titulo", 50);
+        Titulo = new PlaceholderTextField("Titulo", 100);
         Titulo.setFont(new Font("Poppins", Font.PLAIN, 12));        
         Titulo.setBounds(290, 50, 200, 30);
         
-        Autor = new PlaceholderTextField("Autor", 50);
+        Autor = new PlaceholderTextField("Autor", 100);
         Autor.setFont(new Font("Poppins", Font.PLAIN, 12));
         Autor.setBounds(290, 90, 200, 30);
 
@@ -51,7 +51,7 @@ public class CRUD_Libro extends JPanel{
         Año.setFont(new Font("Poppins", Font.PLAIN, 12));
         Año.setBounds(290, 130, 200, 30);
         
-        Editorial = new PlaceholderTextField("Editorial", 30);
+        Editorial = new PlaceholderTextField("Editorial", 100);
         Editorial.setFont(new Font("Poppins", Font.PLAIN, 12));
         Editorial.setBounds(290, 170, 200, 30);
         

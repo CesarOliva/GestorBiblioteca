@@ -6,11 +6,11 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 import Conexion.Sesion;
 
-//Clase confirmationWindow extendida de JFrame. Frame personalizado.
-public class confirmationWindow extends JFrame{
+//Clase ConfirmationWindow extendida de JFrame. Frame personalizado.
+public class ConfirmationWindow extends JFrame{
     JTextField confirmacion;
     
-    public confirmationWindow(String text, Runnable accion){
+    public ConfirmationWindow(String text, Runnable accion){
         //Configuración de la ventana 
         setTitle("Confirmación");
         setSize(300, 180);

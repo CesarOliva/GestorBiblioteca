@@ -1,7 +1,6 @@
 package biblioteca;
 
 //Se importan las librerias a usar
-import Conexion.Peticiones;
 import javax.swing.*;
 import java.awt.*;
 import Conexion.Sesion;

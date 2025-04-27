@@ -32,11 +32,11 @@ public class Menu extends JPanel{
         inicio.setForeground(new Color(100, 149, 237));
         inicio.setBounds(50, 170, 150, 30);
 
-        busqueda = new RoundedButton("Busqueda");
+        busqueda = new RoundedButton("Búsqueda");
         busqueda.setFont(new Font("Poppins", Font.PLAIN, 15));
         busqueda.setBackground(Color.WHITE);
         busqueda.setForeground(new Color(100, 149, 237));
-        busqueda.setBounds(50, 215, 150, 30);
+        busqueda.setBounds(50, 214, 150, 30);
 
         //Dependiendo si es administrador o socio muestra un botón u otro
         if(tipoUsuario.equals("administrador")){
@@ -44,7 +44,7 @@ public class Menu extends JPanel{
             agregarLibro.setFont(new Font("Poppins", Font.PLAIN, 15));
             agregarLibro.setBackground(Color.WHITE);
             agregarLibro.setForeground(new Color(100, 149, 237));
-            agregarLibro.setBounds(50, 260, 150, 30);
+            agregarLibro.setBounds(50, 262, 150, 30);
             
             agregarLibro.addActionListener((ActionEvent e) -> {
                 //Ejecuta el metodo cambiarVista
@@ -56,7 +56,7 @@ public class Menu extends JPanel{
             prestamos.setFont(new Font("Poppins", Font.PLAIN, 15));
             prestamos.setBackground(Color.WHITE);
             prestamos.setForeground(new Color(100, 149, 237));
-            prestamos.setBounds(50, 260, 150, 30);
+            prestamos.setBounds(50, 262, 150, 30);
             
             prestamos.addActionListener((ActionEvent e) -> {
                 //Ejecuta el metodo cambiarVista
@@ -69,7 +69,7 @@ public class Menu extends JPanel{
         estadisticas.setFont(new Font("Poppins", Font.PLAIN, 15));
         estadisticas.setBackground(Color.WHITE);
         estadisticas.setForeground(new Color(100, 149, 237));
-        estadisticas.setBounds(50, 305, 150, 30);
+        estadisticas.setBounds(50, 306, 150, 30);
         
         JButton logOut = new RoundedButton("Cerrar Sesión");
         logOut.setFont(new Font("Poppins", Font.PLAIN, 15));

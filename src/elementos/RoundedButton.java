@@ -20,10 +20,10 @@ public class RoundedButton extends JButton {
                 Graphics2D g2 = (Graphics2D) g.create();
 
                 if (!model.isEnabled()) {
-                    g2.setColor(new Color(200, 200, 200)); // fondo cuando está deshabilitado
+                    g2.setColor(new Color(200, 200, 200));
                     g2.fillRect(0, 0, c.getWidth(), c.getHeight());
 
-                    g2.setColor(Color.black); // texto cuando está deshabilitado
+                    g2.setColor(Color.black);
                     FontMetrics fm = g2.getFontMetrics();
                     int x = (c.getWidth() - fm.stringWidth(button.getText())) / 2;
                     int y = (c.getHeight() + fm.getAscent()) / 2 - 2;

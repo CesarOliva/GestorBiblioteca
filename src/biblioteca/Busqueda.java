@@ -35,7 +35,7 @@ public class Busqueda extends JPanel{
         panelBusqueda.setBackground(Color.white);
         
         //Creación de los elementos
-        busquedaTF = new PlaceholderTextField("Buscar libros por titulo u autor", 100);
+        busquedaTF = new PlaceholderTextField("Buscar libros por titulo o autor", 100);
         busquedaTF.setFont(new Font("Poppins", Font.PLAIN, 14));
         busquedaTF.setBounds(100, 20, 400, 40);
         
@@ -76,6 +76,7 @@ public class Busqueda extends JPanel{
         
         //Scrollpane por si no cabe la busqueda en el panel
         scrollPane = new CustomScroll(panelResultados);
+        scrollPane.setPreferredSize(new Dimension(620, 600));
 
         // Cargar los 10 libros mas recientes al iniciar
         mostrarLibros(Peticiones.obtenerLibrosRecientes(limite, offset));
@@ -94,6 +95,8 @@ public class Busqueda extends JPanel{
         if(libros.isEmpty()){
             JLabel vacio = new JLabel("No se encontraron busquedas coincidentes");
             vacio.setFont(new Font("Poppins", Font.PLAIN, 20));
+            vacio.setAlignmentX(Component.CENTER_ALIGNMENT);
+            vacio.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
             
             panelResultados.add(vacio);
         }
@@ -108,7 +111,6 @@ public class Busqueda extends JPanel{
             //Configuración del panel
             JPanel card = new JPanel();
             card.setLayout(null);
-            card.setForeground(Color.gray);
             card.setPreferredSize(new Dimension(500, 220));
             card.setBounds(50, 0, 500, 220);
 
@@ -126,31 +128,30 @@ public class Busqueda extends JPanel{
                             .getScaledInstance(133, 200, Image.SCALE_SMOOTH);
                 Portada.setIcon(new ImageIcon(imagen));
             }
-            Portada.setBounds(10,12,133,200);
+            Portada.setBounds(10,10,133,200);
             
 
             JLabel Titulo = new JLabel(libro.getTitulo());
             Titulo.setFont(new Font("Poppins", Font.PLAIN, 14));        
-            Titulo.setBounds(150, 0, 200, 30);
+            Titulo.setBounds(153, 10, 400, 20);
 
             JLabel Autor = new JLabel(libro.getAutor());
             Autor.setFont(new Font("Poppins", Font.BOLD, 14));
-            Autor.setBounds(150, 30, 200, 30);
+            Autor.setBounds(153, 30, 200, 30);
 
             JTextArea Descripcion = new JTextArea(libro.getDescripcion());
             Descripcion.setFont(new Font("Poppins", Font.PLAIN, 12));
             Descripcion.setEditable(false);
             Descripcion.setFocusable(false);
-            Descripcion.setBackground(Color.white);
             Descripcion.setLineWrap(true); // Salto de línea automático
             Descripcion.setWrapStyleWord(true); // Corta palabras completas
-            Descripcion.setBounds(150, 60, 280, 60);
+            Descripcion.setBounds(148, 57, 330, 120);
 
             JButton verMas = new RoundedButton("Ver mas");
             verMas.setForeground(Color.white);
             verMas.setBackground(new Color(100, 149, 237));
             verMas.setFont(new Font("Poppins", Font.PLAIN, 14));
-            verMas.setBounds(150, 120, 100, 30);
+            verMas.setBounds(153, 180, 100, 30);
 
             int idLibro = libro.getId();
             verMas.addActionListener(e -> {
