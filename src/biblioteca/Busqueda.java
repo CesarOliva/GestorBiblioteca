@@ -230,6 +230,11 @@ public class Busqueda extends JPanel{
         // Desactiva botón siguiente
         siguiente.setEnabled(offset + limite < Peticiones.contarLibros());
         
+        if(!busquedaTF.validarContenido()){
+            anterior.setEnabled(false);
+            siguiente.setEnabled(false);
+        }
+        
         //Agregar los botones al panel de paginacion y el panel al panel de resultados
         paginacion.add(siguiente);
         paginacion.add(anterior);

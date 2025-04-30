@@ -37,6 +37,7 @@ public class Prestamos extends JPanel{
         PlaceholderTextField busqueda = new PlaceholderTextField("Busca un prestamo", 50);
         busqueda.setFont(new Font("Poppins", Font.PLAIN, 14));
         busqueda.setBounds(100, 20, 400, 40);
+        busqueda.setEnabled(false);
         
         // Configurar el DocumentListener para búsqueda en tiempo real
         busqueda.getDocument().addDocumentListener(new DocumentListener() {
