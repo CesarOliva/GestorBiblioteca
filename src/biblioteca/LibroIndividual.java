@@ -22,7 +22,7 @@ import java.time.LocalDate;
 
 //Clase LibroIndividual extendida de JPanel. Panel personalizado
 public class LibroIndividual extends JPanel{
-    private JButton editar, eliminar, rentar;
+    public static JButton editar, eliminar, rentar, devolver;
     private int IdLibro, añoInt, paginasInt;
     private String isbn, titulo, autor, portada, año, editorial, genero, paginas, descripcion, admin;
     private JPanel panelVista, panelEditar;
@@ -129,14 +129,28 @@ public class LibroIndividual extends JPanel{
         rentar.setBackground(new Color(100, 149, 237));
         rentar.setBounds(50, 460, 100, 30);
         
+        devolver = new RoundedButton("Devolver"); 
+        devolver.setFont(new Font("Poppins", Font.PLAIN, 15));
+        devolver.setForeground(Color.white);
+        devolver.setBackground(new Color(100, 149, 237));
+        devolver.setBounds(50, 460, 100, 30);
+        
         if(Sesion.getTipo().equals("administrador")){
             editar.setVisible(true);
             eliminar.setVisible(true);
             rentar.setVisible(false);
+            devolver.setVisible(false);
         }else{
             editar.setVisible(false);
             eliminar.setVisible(false);
-            rentar.setVisible(true);
+            
+            if(Peticiones.verificarLibroRentado(Sesion.getIdUsuario(), IdLibro)){
+                rentar.setVisible(false);
+                devolver.setVisible(true);
+            }else {
+                rentar.setVisible(true);
+                devolver.setVisible(false);
+            }
         }
         
         
@@ -194,6 +208,10 @@ public class LibroIndividual extends JPanel{
             Peticiones.PrestamoLibro(Sesion.getIdUsuario(), IdLibro, titulo); 
         });
         
+        devolver.addActionListener(e->{
+            Peticiones.devolverLibro(IdLibro);
+        });
+        
         panelEditar = new JPanel(null);
         panelEditar.setBounds(0,0,650, 600);
         panelEditar.setBackground(Color.white);
@@ -212,6 +230,7 @@ public class LibroIndividual extends JPanel{
         panelVista.add(editar);
         panelVista.add(rentar);
         panelVista.add(eliminar);
+        panelVista.add(devolver);
         
         add(panelVista);
         

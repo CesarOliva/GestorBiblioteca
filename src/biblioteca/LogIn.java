@@ -396,14 +396,10 @@ public class LogIn extends JFrame {
             String pass = new String(txtPassR.getPassword());
 
             //Verifica que nombre solo tenga letras y espacios
-            if(nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")){
-                encontrado = false;
-            }else{
-                encontrado = true;
-            }
+            encontrado = !nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+");
             
             //Verifica que estén todos los campos seleccionados
-            if(txtNombreR.validarContenido() || txtUserR.validarContenido() || pass.isEmpty() || encontrado){
+            if(txtNombreR.validarContenido() || txtUserR.validarContenido() || pass.isEmpty() || encontrado || user.contains(" ")){
                 if(txtNombreR.validarContenido() || encontrado) txtNombreR.setForeground(Color.red);
                 if(txtUserR.validarContenido() || user.contains(" ")) txtUserR.setForeground(Color.red);
                 if(pass.isEmpty()) txtPassR.setForeground(Color.red);

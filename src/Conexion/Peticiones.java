@@ -96,12 +96,11 @@ public class Peticiones {
                 new WindowMessage("Usuario Agregado Exitosamente");
                 
                 //Crea una notificacion.
-                PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje, Tipo) values (?,?,?)");
+                PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje) values (?,?)");
                 
                 //Pasa los valores
                 insertarNotificacion.setInt(1, IdUsuario);
                 insertarNotificacion.setString(2, "Termine de configurar su cuenta agregando una foto.");
-                insertarNotificacion.setString(3, "Informativa");
                 
                 insertarNotificacion.executeUpdate();
 
@@ -114,8 +113,8 @@ public class Peticiones {
                 //Regresa si fue posible crear usuario o no
                 return true;
             }
-        }catch(Exception ex){
-            new WindowError("Ocurrió un error. Intente nuevamente");
+        }catch(IOException | SQLException ex){
+            new WindowError("Ocurrió un error. Intente nuevamente.");
             System.out.println("Error: "+ex);
             
             //Regresa si fue posible crear usuario o no
@@ -168,8 +167,8 @@ public class Peticiones {
             
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");
             System.out.println("Error: "+error);
         }
     }
@@ -188,21 +187,20 @@ public class Peticiones {
             ResultSet consultaNoti = busquedaNoti.executeQuery();
             
             int id=0;
-            String mensaje="", tipo="";
+            String mensaje="";
             //Recorre todas las notificaciones consultadas
             while(consultaNoti.next()){
                 mensaje = consultaNoti.getString("Mensaje");
-                tipo = consultaNoti.getString("Tipo");
                 id = consultaNoti.getInt("IdNotificacion");
                 
-                notificaciones.add(new Notificacion(id, mensaje, tipo));
+                notificaciones.add(new Notificacion(id, mensaje));
             }
 
             //Cierra la conexion
             conectar.cerrarConexion();
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
         }
         
         return notificaciones;
@@ -223,15 +221,15 @@ public class Peticiones {
             if (filasAfectadas > 0) {
                 usuario.cargarNotificaciones();
             } else {
-                new WindowError("Ocurrió un error. Intente nuevamente");
+                new WindowError("Ocurrió un error. Intente nuevamente.");
             }
             
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
        
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
     }
     
@@ -258,19 +256,55 @@ public class Peticiones {
             
             //Cierra la conexion
             conectar.cerrarConexion();
-        } catch (Exception error) {
+        } catch (SQLException error) {
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
         }
     }
     
 
+    
+    //Verificar adeudos
+    public static boolean verificarAdeudos(int IdUsuario){
+        boolean adeudo = false;
+        try {
+            //Inicia la conexión
+            Connection conexion = conectar.conectar();
+
+            //Verifica que no tenga adeudos
+            PreparedStatement verificarAdeudos = conexion.prepareStatement("select * from multas where IdSocio='"+Sesion.getIdUsuario()+"' and Pagado=0");
+            ResultSet consultaAdeudos = verificarAdeudos.executeQuery();
+            
+            if(consultaAdeudos.next()){
+                adeudo =  true;
+                return adeudo;
+            }
+            
+            PreparedStatement consulta = conexion.prepareStatement("select count(*) from prestamos where IdSocio='"+IdUsuario+"' and Devuelto=0");
+            ResultSet resultado = consulta.executeQuery();
+        
+            if (resultado.next()) {
+                int cantidad = resultado.getInt(1);
+                adeudo = cantidad > 0; // Si tiene al menos un préstamo pendiente, hay adeudo
+            }
+        
+            conectar.cerrarConexion();
+        }catch(SQLException error){
+            new WindowError("Ocurrio un error. Intente nuevamente.");
+            System.out.println("Error: "+error);
+        }
+        return adeudo;
+    }    
+    
+    
     
     //Elimina el usuario
     public static void eliminarUsuario(String usuario) {
         try{
             //Inicia la conexion
             Connection conexion = conectar.conectar();
+            
+            
             
             //Elimina las notificaciones 
             PreparedStatement eliminarNotificaciones = conexion.prepareStatement("delete from notificaciones where IdUsuario='"+Sesion.getIdUsuario()+"'");
@@ -287,14 +321,14 @@ public class Peticiones {
                 biblioteca.App.getInstancia().cerrar();
                 new biblioteca.LogIn();
             } else {
-                new WindowError("Ocurrió un error. Intente nuevamente");
+                new WindowError("Ocurrió un error. Intente nuevamente.");
             }
             
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
     }    
     
@@ -437,12 +471,11 @@ public class Peticiones {
             
                             
             //Crea una notificacion.
-            PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje, Tipo) values (?,?,?)");
+            PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje) values (?,?)");
 
             //Pasa los valores
             insertarNotificacion.setInt(1, IdUsuarioActivo);
             insertarNotificacion.setString(2, "Agregaste el libro '"+titulo+"' a la base de datos.");
-            insertarNotificacion.setString(3, "Informativa");
 
             insertarNotificacion.executeUpdate();
             
@@ -456,8 +489,8 @@ public class Peticiones {
             conectar.cerrarConexion();
 
             new WindowMessage("Libro Agregado Exitosamente");
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");
+        }catch(IOException | SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");
             System.out.println("Error: "+error);
         }
     }
@@ -525,9 +558,9 @@ public class Peticiones {
             
             //Cierra la conexion
             conectar.cerrarConexion();
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
     }
     
@@ -566,9 +599,9 @@ public class Peticiones {
             
             //Cerrar la conexión
             conectar.cerrarConexion();
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
         //Retorna la lista de libros
         return libros;
@@ -592,9 +625,9 @@ public class Peticiones {
 
             //Cierra la conexión
             conectar.cerrarConexion();
-        } catch (Exception error) {
+        } catch (SQLException error) {
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
         return total;
     }
@@ -627,9 +660,9 @@ public class Peticiones {
             
             //Cerrar la conexion
             conectar.cerrarConexion();
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
 
         //Retorna la lista de libros
@@ -644,6 +677,32 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
+            //Verifica cuántos préstamos activos tiene el usuario
+            PreparedStatement conteoPrestamos = conexion.prepareStatement("select count(*) from prestamos where IdSocio=? AND Devuelto=0");
+            conteoPrestamos.setInt(1, IdUsuario);
+
+            ResultSet resultado = conteoPrestamos.executeQuery();
+            
+            resultado.next();
+            
+            int prestamosActivos = resultado.getInt(1);
+            if (prestamosActivos >= 3) {
+                new WindowError("Límite de 3 prestamos activos alcanzado.");
+                conectar.cerrarConexion();
+                return;
+            }
+            
+            //Verifica que no tenga adeudos
+            PreparedStatement verificarAdeudos = conexion.prepareStatement("select * from multas where IdSocio='"+IdUsuario+"' and Pagado=0");
+            ResultSet consultaAdeudos = verificarAdeudos.executeQuery();
+            
+            if(consultaAdeudos.next()){
+                new WindowError("No puedes rentar libros. Tienes multas sin pagar.");
+                conectar.cerrarConexion();
+                return;
+            }
+            
+            //Si tiene menos de 3 prestamos activos
             PreparedStatement insertarPrestamo = conexion.prepareStatement("insert into prestamos values (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             
             LocalDate vuelta = LocalDate.now().plusDays(7);
@@ -659,21 +718,24 @@ public class Peticiones {
             insertarPrestamo.executeUpdate();
             
             //Crea una notificacion.
-            PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje, Tipo) values (?,?,?)");
+            PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje) values (?,?)");
 
             //Pasa los valores
             insertarNotificacion.setInt(1, IdUsuario);
             insertarNotificacion.setString(2, "Libro '"+titulo+"' a devolver antes del "+vuelta);
-            insertarNotificacion.setString(3, "Informativa");
 
             insertarNotificacion.executeUpdate();
             
             new WindowMessage("Libro '"+titulo+"' a devolver antes del "+vuelta);
+            
+            biblioteca.LibroIndividual.rentar.setVisible(false);
+            biblioteca.LibroIndividual.devolver.setVisible(true);
+
 
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");
             System.out.println("Error: "+error);
         }
     }
@@ -724,14 +786,166 @@ public class Peticiones {
             
             //Cierra la conexion
             conectar.cerrarConexion();
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");
             System.out.println("Error: "+error);
         }
         
         return libros;
     }
     
+    
+    
+    //Devolver libro
+    public static void devolverLibro(int IdLibro){
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+            
+            //Actualizar prestamo
+            PreparedStatement actualizarPrestamo = conexion.prepareStatement("update prestamos set Devuelto=1 where IdLibro=?"
+                + " and IdSocio=? and Devuelto=0");
+            actualizarPrestamo.setInt(1, IdLibro);
+            actualizarPrestamo.setInt(2, Sesion.getIdUsuario());
+            
+            int filasActualizadas = actualizarPrestamo.executeUpdate();
+
+            if(filasActualizadas>0){
+                PreparedStatement obtenerPrestamo = conexion.prepareStatement("select IdPrestamo from prestamos where IdLibro=? "
+                    + "and IdSocio=? and Devuelto=1 order by FechaPrestamo desc limit 1");
+                obtenerPrestamo.setInt(1, IdLibro);
+                obtenerPrestamo.setInt(2, Sesion.getIdUsuario());
+
+                ResultSet consultaPrestamo = obtenerPrestamo.executeQuery();
+                if (consultaPrestamo.next()) {
+                    int idPrestamo = consultaPrestamo.getInt("IdPrestamo");
+
+                    PreparedStatement devolverPrestamo = conexion.prepareStatement("insert into devoluciones (IdPrestamo, FechaDevolucion) values (?,?)");
+                    devolverPrestamo.setInt(1, idPrestamo);
+                    devolverPrestamo.setDate(2, java.sql.Date.valueOf(fecha));
+                    
+                    devolverPrestamo.executeUpdate();
+                    
+                    new WindowMessage("Libro devuelto exitosamente");
+                    
+                    biblioteca.LibroIndividual.rentar.setVisible(true);
+                    biblioteca.LibroIndividual.devolver.setVisible(false);
+                }
+            }
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");
+            System.out.println("Error: "+error);            
+        }
+    }
+    
+    
+    
+    
+    //Obtener la devolución
+    public static LocalDate obtenerDevolucion(int idPrestamo){
+        LocalDate fechaDevolucion;
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement busquedaDevolucion = conexion.prepareStatement("select FechaDevolucion from devoluciones where IdPrestamo='"+idPrestamo+"'");
+            ResultSet consultaDevolucion = busquedaDevolucion.executeQuery();
+            
+            if(consultaDevolucion.next()){
+                Date DateVuelta = consultaDevolucion.getDate("FechaDevolucion");
+                fechaDevolucion = DateVuelta != null ? DateVuelta.toLocalDate() : null;
+                
+                return fechaDevolucion;
+            }
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");
+            System.out.println("Error: "+error);            
+        }
+        return fecha;
+    }
+    
+    
+    
+    //Verificar si el libro está rentado
+    public static boolean verificarLibroRentado(int idUsuario, int idLibro){
+        boolean rentado = false;
+        try{
+            Connection conexion = conectar.conectar();
+         
+            PreparedStatement libroRentado = conexion.prepareStatement("select * from prestamos where IdSocio = ? and IdLibro = ? and Devuelto=0");
+            libroRentado.setInt(1, idUsuario);
+            libroRentado.setInt(2, idLibro);
+         
+            ResultSet consultaLibro = libroRentado.executeQuery();
+         
+            if(consultaLibro.next()){
+                rentado = true;
+            }
+         
+            conectar.cerrarConexion();
+        }catch(SQLException error){
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente.");
+        }
+        return rentado;
+    }
+
+    
+    
+    //Generar multas
+    public static void generarMultas(){
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+            
+            PreparedStatement busquedaPrestamo = conexion.prepareStatement("select * from prestamos where Devuelto=0");
+            ResultSet consultaPrestamo = busquedaPrestamo.executeQuery();
+            
+            while(consultaPrestamo.next()){
+                Date DatePrestamo = consultaPrestamo.getDate("FechaVuelta");
+                LocalDate fechaVuelta = DatePrestamo != null ? DatePrestamo.toLocalDate() : null;
+                
+                if (!fecha.isBefore(fechaVuelta)) {
+                    int IdPrestamo = consultaPrestamo.getInt("IdPrestamo");
+                    int IdSocio = consultaPrestamo.getInt("IdSocio");
+
+                    PreparedStatement busquedaMulta = conexion.prepareStatement("select * from multas where IdSocio='"+IdSocio+"' and IdPrestamo='"+IdPrestamo+"'");
+                    ResultSet consultaMulta = busquedaMulta.executeQuery();
+                    
+                    if(!consultaMulta.next()){
+                        PreparedStatement insertarMulta = conexion.prepareStatement("insert into multas (IdSocio, IdPrestamo, Monto, Pagado) values (?,?,?,?)");
+
+                        insertarMulta.setInt(1, IdSocio);
+                        insertarMulta.setInt(2, IdPrestamo);
+                        insertarMulta.setInt(3, 400);
+                        insertarMulta.setInt(4, 0);
+
+                        insertarMulta.executeUpdate();
+
+                        PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje) values (?,?)");
+
+                        insertarNotificacion.setInt(1, IdSocio);
+                        insertarNotificacion.setString(2, "Se ha generado una multa a tu cuenta");
+
+                        insertarNotificacion.executeUpdate();
+                    }
+                }
+            }
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        }catch(SQLException error){
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
+        }
+    }
+
     
     
     //Obtener los datos del autor
@@ -752,8 +966,8 @@ public class Peticiones {
             }
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
             System.out.println("Error: "+error);
         }        
     }
@@ -781,8 +995,8 @@ public class Peticiones {
 
                 libros.add(new LibroBusqueda(idLibro, titulo, autor, portada, descripcion));
             }
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
             System.out.println("Error: "+error);
         }
         return libros;
@@ -806,9 +1020,9 @@ public class Peticiones {
 
             //Cierra la conexión
             conectar.cerrarConexion();
-        } catch (Exception error) {
+        } catch (SQLException error) {
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
         return total;
     }
@@ -834,8 +1048,8 @@ public class Peticiones {
             
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
             System.out.println("Error: "+error);
         }
     }
@@ -871,8 +1085,8 @@ public class Peticiones {
                     libros.add(new LibroBusqueda(idLibro, titulo, autor, portada, descripcion));
                 }
             }
-        }catch(Exception error){
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+        }catch(SQLException error){
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
             System.out.println("Error: "+error);
         }
         return libros;
@@ -898,7 +1112,7 @@ public class Peticiones {
             conectar.cerrarConexion();
         } catch (Exception error) {
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
         return total;
     }
@@ -922,14 +1136,14 @@ public class Peticiones {
                 new WindowMessage("Libro eliminado correctamente.");
                 App.cambiarVista(new Busqueda(), Menu.busqueda);
             } else {
-                new WindowError("Ocurrió un error. Intente nuevamente");
+                new WindowError("Ocurrió un error. Intente nuevamente.");
             }
             
             //Cierra la conexión a la base de datos
             conectar.cerrarConexion();
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");
+            new WindowError("Ocurrió un error. Intente nuevamente.");
         }
     }        
     
@@ -941,7 +1155,7 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement actualizarEditorial = conexion.prepareStatement("update editoriales set Editorial=?, Descripcion=? where idEditorial=?");
+            PreparedStatement actualizarEditorial = conexion.prepareStatement("update editoriales set Editorial=?, Descripcion=? where IdEditorial=?");
             
             actualizarEditorial.setString(1, editorial);
             actualizarEditorial.setString(2, descripcion);
@@ -956,7 +1170,7 @@ public class Peticiones {
             conectar.cerrarConexion();
         } catch (Exception error) {
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
         }        
     }
     
@@ -968,7 +1182,7 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement actualizarEditorial = conexion.prepareStatement("update autores set Nombre=?, Biografia=? where idAutor=?");
+            PreparedStatement actualizarEditorial = conexion.prepareStatement("update autores set Nombre=?, Biografia=? where IdAutor=?");
             
             actualizarEditorial.setString(1, autor);
             actualizarEditorial.setString(2, biografia);
@@ -981,9 +1195,9 @@ public class Peticiones {
             
             //Cierra la conexion
             conectar.cerrarConexion();
-        } catch (Exception error) {
+        } catch (SQLException error) {
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
         }        
     }
     
@@ -1014,9 +1228,97 @@ public class Peticiones {
             
             //Cierra la conexion
             conectar.cerrarConexion();            
-        }catch(Exception error){
+        }catch(SQLException error){
             System.out.println("Error: "+error);
-            new WindowError("Ocurrió un error. Intente nuevamente");            
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
         }
     }
+    
+    
+    
+    //Obtener los libros subidos por los administradores
+    public static ArrayList<LibrosAdministradores> librosAdministradores(){
+        ArrayList<LibrosAdministradores> admins = new ArrayList<>();
+        
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+        
+            //Buscar en la tabla de usuarios los usuarios de tipo administrador
+            PreparedStatement busquedaAdmins = conexion.prepareStatement("select * from usuarios where TipoUsuario='administrador'");
+            ResultSet consultaAdmins = busquedaAdmins.executeQuery();
+            
+            //Guarda los administradores
+            ArrayList<Integer> administradores = new ArrayList<>();
+            
+            while(consultaAdmins.next()){
+                int IdAdmin = consultaAdmins.getInt("IdUsuario");
+                
+                //agregar los IdUsuario a un arreglo
+                administradores.add(IdAdmin);
+            }
+            
+            //hacer la busqueda por cada uno de los administradores
+            for(int IdAdmin : administradores){
+                PreparedStatement cuentaAdmin = conexion.prepareStatement("select count(*) from librosadministradores where IdAdmin='"+IdAdmin+"'");
+                ResultSet consultaCuenta = cuentaAdmin.executeQuery();
+                
+                if(consultaCuenta.next()){
+                    int cantidad = consultaCuenta.getInt(1);
+                    
+                    //los que tengan una cuenta > 0, agregarlos a una clase librosAdministradores que tenga la cantidad y el nombre
+                    if(cantidad > 0){
+                        PreparedStatement obtenerAdmin = conexion.prepareStatement("select Usuario from usuarios where IdUsuario='"+IdAdmin+"'");
+                        ResultSet consultaObtener = obtenerAdmin.executeQuery();         
+                        
+                        if(consultaObtener.next()){
+                            //Obtener el usuario
+                            String usuario = consultaObtener.getString("Usuario");
+                            admins.add(new LibrosAdministradores(usuario, cantidad));
+                        }
+                    }
+                }
+            }
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();
+        }catch(SQLException error){
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
+        }
+        
+        //retornar el arrayList
+        return admins;
+    }
+    
+    
+    
+    //Obtener los generos de los libros
+    public static ArrayList<LibrosGeneros> obtenerGeneros(){
+        ArrayList<LibrosGeneros> generos = new ArrayList<>();
+        
+        try{
+            //Inicia la conexion
+            Connection conexion = conectar.conectar();
+
+            PreparedStatement busquedaGenero = conexion.prepareStatement("select g.Genero, count(*) as Cantidad from prestamos p join libros l "
+                    + "on p.IdLibro = l.IdLibro join generos g on l.IdGenero = g.IdGenero group by g.Genero order by Cantidad desc");
+            ResultSet consultaGenero = busquedaGenero.executeQuery();
+
+            // Recorre el resultado
+            while (consultaGenero.next()) {
+                String genero = consultaGenero.getString("Genero");
+                int cantidad = consultaGenero.getInt("Cantidad");
+                generos.add(new LibrosGeneros(genero, cantidad));
+            }
+            
+            //Cierra la conexion
+            conectar.cerrarConexion();            
+        }catch(SQLException error){
+            System.out.println("Error: "+error);
+            new WindowError("Ocurrió un error. Intente nuevamente.");            
+        }
+        //Retorna el genero y la cantidad de libros del genero
+        return generos;
+    }    
 }

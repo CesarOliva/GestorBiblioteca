@@ -205,8 +205,13 @@ public class Usuario extends JPanel {
         });
 
         btnEliminar.addActionListener(e -> {
-            new ConfirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta",
-                () -> Peticiones.eliminarUsuario(Sesion.getUsuario()));
+            //Solo elimina si no tiene adeudos
+            if(Peticiones.verificarAdeudos(Sesion.getIdUsuario())) {
+                new WindowError("No puedes eliminar tu cuenta. Tienes adeudos o libros pendientes.");
+            }else{
+                new ConfirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta",
+                    () -> Peticiones.eliminarUsuario(Sesion.getUsuario()));
+            }
         });
         
         JScrollPane scrollPane = new CustomScroll(notificaciones);

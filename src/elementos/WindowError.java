@@ -33,7 +33,7 @@ public class WindowError extends JFrame {
         error.setContentType("text/html");
         error.setText("<html>"
                 + "<p style='font-family:Inter; font-size:10px; font-weight:400; color:#000; text-align:center'>"+text+"</p>");
-        error.setBounds(100, 5, 150, 80);
+        error.setBounds(100, 5, 150, 85);
         error.setBackground(Color.white);
         error.setEditable(false);
         error.setFocusable(false);

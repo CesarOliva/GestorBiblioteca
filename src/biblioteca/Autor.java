@@ -356,7 +356,7 @@ public class Autor extends JPanel {
         
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoSeleccionado = fileChooser.getSelectedFile();
-            String destinoPath = "C:/xampp/htdocs/Imagenes/"+autor.trim().replace(" ","")+".jpg";
+            String destinoPath = "C:/xampp/htdocs/Imagenes/"+autor.trim().replace(" ","_")+".jpg";
             File destino = new File(destinoPath);
             
             try {

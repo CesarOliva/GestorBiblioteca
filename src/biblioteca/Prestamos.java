@@ -7,6 +7,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.util.ArrayList;
 import java.io.File;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import Conexion.Peticiones;
 import Conexion.Sesion;
@@ -131,9 +133,22 @@ public class Prestamos extends JPanel{
             FechaDevolucion.setFont(new Font("Poppins", Font.PLAIN, 14));
             FechaDevolucion.setBounds(153, 100, 400, 20);
 
-            JLabel DiasRestantes = new JLabel("Tienes x dias para devolverlo");
-            DiasRestantes.setFont(new Font("Poppins", Font.BOLD, 14));
-            DiasRestantes.setBounds(153, 130, 400, 30);
+            long diferenciaDias = ChronoUnit.DAYS.between(LocalDate.now(), libro.getFechaDevolucion());
+
+            JLabel estado = new JLabel("");
+            estado.setFont(new Font("Poppins", Font.BOLD, 14));
+            estado.setBounds(153, 130, 400, 30);
+            
+            if(!libro.getEstado()){
+                if(diferenciaDias>0){
+                    estado.setText("Tienes "+diferenciaDias+" dias para devolverlo");
+                }else{
+                    estado.setText("Entrega atrasada por "+Math.abs(diferenciaDias)+" dias");
+                    estado.setForeground(Color.red);
+                }                
+            }else{
+                estado.setText("Libro devuelto el: "+Peticiones.obtenerDevolucion(libro.getIdPrestamo()));
+            }
 
             JButton verMas = new RoundedButton("Ver mas");
             verMas.setForeground(Color.white);
@@ -169,7 +184,7 @@ public class Prestamos extends JPanel{
             card.add(Autor);
             card.add(FechaPrestamo);
             card.add(FechaDevolucion);
-            card.add(DiasRestantes);
+            card.add(estado);
             card.add(verMas);
 
             //Agrega el contenido del card a la fila y la fina al panel

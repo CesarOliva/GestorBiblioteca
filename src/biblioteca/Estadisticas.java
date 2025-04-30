@@ -1,138 +1,102 @@
 package biblioteca;
 
-import Conexion.Conexion;
+//Se importan las librerias necesarias
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.*;
-import java.time.LocalDate;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
+import java.util.*;
+import org.jfree.chart.*;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.chart.axis.*;
+import org.jfree.chart.plot.CategoryPlot;
 
+import Conexion.Peticiones;
+import elementos.CustomScroll;
+
+//Clase Estadisticas extendida de JPanel. Panel personalizado
 public class Estadisticas extends JPanel {
-    private JTable tablaEstadisticas;
-    private DefaultTableModel modeloTabla;
-    private JComboBox<String> comboFiltro;
-    private JLabel lblTotalBusquedas;
-
     public Estadisticas() {
-        setLayout(new BorderLayout(10, 10));
-        setBackground(Color.WHITE);
-        setBorder(new EmptyBorder(10, 10, 10, 10));
-
-        // Panel superior con controles
-        JPanel panelControles = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
-        panelControles.setBackground(Color.WHITE);
+        //Configuración del panel
+        setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(650, 600));
+        setBackground(Color.white);
         
-        // Filtros
-        comboFiltro = new JComboBox<>(new String[]{"Todos", "Este mes", "Esta semana"});
-        comboFiltro.setFont(new Font("Poppins", Font.PLAIN, 12));
+        //GRAFICA DE ADMINISTRADORES MAS ACTIVOS
+        DefaultCategoryDataset datosLibros = new DefaultCategoryDataset();
         
-        // Botones
-        JButton btnActualizar = new JButton("Actualizar");
-        btnActualizar.setFont(new Font("Poppins", Font.PLAIN, 12));
-        btnActualizar.addActionListener(e -> cargarEstadisticas());
+        //Obtiene los datos de los libros subidos por administradores
+        ArrayList<LibrosAdministradores> admins = Peticiones.librosAdministradores();
         
-        // Estadísticas globales
-        lblTotalBusquedas = new JLabel("Total de búsquedas: 0");
-        lblTotalBusquedas.setFont(new Font("Poppins", Font.BOLD, 12));
-
-        panelControles.add(new JLabel("Filtrar por:"));
-        panelControles.add(comboFiltro);
-        panelControles.add(btnActualizar);
-        panelControles.add(Box.createHorizontalStrut(50));
-        panelControles.add(lblTotalBusquedas);
-
-        // Configurar tabla
-        configurarTabla();
-        
-        add(panelControles, BorderLayout.NORTH);
-        add(new JScrollPane(tablaEstadisticas), BorderLayout.CENTER);
-        
-        cargarEstadisticas();
-    }
-
-    private void configurarTabla() {
-        modeloTabla = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-            
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                return columnIndex == 0 ? Integer.class : String.class;
-            }
-        };
-        
-        modeloTabla.addColumn("#");
-        modeloTabla.addColumn("Título");
-        modeloTabla.addColumn("Autor");
-        modeloTabla.addColumn("Búsquedas");
-        modeloTabla.addColumn("Última búsqueda");
-
-        tablaEstadisticas = new JTable(modeloTabla);
-        tablaEstadisticas.setFont(new Font("Poppins", Font.PLAIN, 12));
-        tablaEstadisticas.setRowHeight(30);
-        tablaEstadisticas.setAutoCreateRowSorter(true);
-        
-        // Centrar contenido de columnas
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < tablaEstadisticas.getColumnCount(); i++) {
-            tablaEstadisticas.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        for(LibrosAdministradores dato : admins){
+            //Agrega los datos al modelo de datos
+            datosLibros.addValue(dato.getCantidad(), "Libros", dato.getAdministrador());
         }
-    }
 
-    private void cargarEstadisticas() {
-        modeloTabla.setRowCount(0);
-        int totalBusquedas = 0;
+        // Crear la gráfica
+        JFreeChart graficaBarra = ChartFactory.createBarChart("         Administradores más Activos", "Administrador", "Libros subidos", datosLibros);
 
-        try (Connection conexion = Conexion.getInstance().conectar()) {
-            // Consulta dinámica según filtro
-            String filtro = (String) comboFiltro.getSelectedItem();
-            String sql = "SELECT l.Titulo, a.Nombre as Autor, l.contador_busquedas, l.ultima_busqueda " +
-                         "FROM libros l JOIN autores a ON l.IdAutor = a.IdAutor ";
-            
-            if (filtro.equals("Este mes")) {
-                sql += "WHERE l.ultima_busqueda >= '" + LocalDate.now().withDayOfMonth(1) + "' ";
-            } else if (filtro.equals("Esta semana")) {
-                sql += "WHERE l.ultima_busqueda >= '" + LocalDate.now().minusDays(7) + "' ";
-            }
-            
-            sql += "ORDER BY l.contador_busquedas DESC LIMIT 10";
+        graficaBarra.getTitle().setFont(new Font("Poppins", Font.PLAIN, 18));
+        graficaBarra.getLegend().setItemFont(new Font("Poppins", Font.PLAIN, 12));
+        graficaBarra.setBackgroundPaint(Color.WHITE);
+        graficaBarra.getPlot().setBackgroundPaint(new Color(245, 245, 245));
+        
+        CategoryPlot plot = (CategoryPlot) graficaBarra.getPlot();
 
-            try (Statement stmt = conexion.createStatement();
-                 ResultSet rs = stmt.executeQuery(sql)) {
-                
-                int posicion = 1;
-                while (rs.next()) {
-                    modeloTabla.addRow(new Object[]{
-                        posicion++,
-                        rs.getString("Titulo"),
-                        rs.getString("Autor"),
-                        rs.getInt("contador_busquedas"),
-                        rs.getDate("ultima_busqueda") != null ? 
-                            rs.getDate("ultima_busqueda").toLocalDate().toString() : "Nunca"
-                    });
-                    totalBusquedas += rs.getInt("contador_busquedas");
-                }
-            }
-            
-            // Consulta para total general
-            try (Statement stmt = conexion.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT SUM(contador_busquedas) FROM libros")) {
-                if (rs.next()) {
-                    totalBusquedas = rs.getInt(1);
-                }
-            }
-            
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Error al cargar estadísticas:\n" + e.getMessage(), 
-                "Error", JOptionPane.ERROR_MESSAGE);
+        CategoryAxis domainAxis = plot.getDomainAxis();
+        domainAxis.setLabelFont(new Font("Poppins", Font.PLAIN, 14)); // Nombre del eje
+        domainAxis.setTickLabelFont(new Font("Poppins", Font.PLAIN, 12)); // Valores del eje
+
+        ValueAxis rangeAxis = plot.getRangeAxis();
+        rangeAxis.setLabelFont(new Font("Poppins", Font.PLAIN, 14));
+        rangeAxis.setTickLabelFont(new Font("Poppins", Font.PLAIN, 12));
+
+        // Crear un panel para mostrar la gráfica de Barra
+        ChartPanel panelGraficaBarra = new ChartPanel(graficaBarra);
+        panelGraficaBarra.setPreferredSize(new Dimension(400,400));
+        panelGraficaBarra.setMaximumSize(new Dimension(400,400));
+        panelGraficaBarra.setBackground(Color.white);
+        panelGraficaBarra.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        
+        
+        //GRAFICA DE LOS GENEROS DE LOS LIBROS AGREGADOS
+        DefaultPieDataset datosGeneros = new DefaultPieDataset();
+
+        //Obtiene los datos de los generos de los libros
+        ArrayList<LibrosGeneros> generos = Peticiones.obtenerGeneros();
+        
+        //Ordenarlo de mayor a menor
+        generos.sort((a, b) -> Integer.compare(b.getCantidad(), a.getCantidad()));
+        
+        for(LibrosGeneros dato : generos){
+            //Agrega los datos al modelo de datos
+            datosGeneros.setValue(dato.getGenero(), dato.getCantidad());
         }
         
-        lblTotalBusquedas.setText("Total de búsquedas: " + totalBusquedas);
+        //Crear la gráfica
+        JFreeChart pieChart = ChartFactory.createPieChart("Generos mas rentados", datosGeneros, true, true, false);
+        
+        pieChart.getTitle().setFont(new Font("Poppins", Font.PLAIN, 18));
+        pieChart.getLegend().setItemFont(new Font("Poppins", Font.PLAIN, 12));
+        pieChart.setBackgroundPaint(Color.WHITE);
+        pieChart.getPlot().setBackgroundPaint(new Color(245, 245, 245));
+        
+        //Crear el panel para mostrar la gráfica de pastel
+        ChartPanel panelGraficaPastel = new ChartPanel(pieChart);
+        panelGraficaPastel.setPreferredSize( new Dimension(400,400));      
+        panelGraficaPastel.setMaximumSize( new Dimension(400,400));      
+
+        JPanel contenedor = new JPanel();
+        contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
+        contenedor.setPreferredSize(new Dimension(620, 600));
+        contenedor.setBackground(Color.white);
+        
+        contenedor.add(panelGraficaBarra);
+        contenedor.add(panelGraficaPastel);
+        
+        //Crea un scrollPane
+        JScrollPane scroll = new CustomScroll(contenedor);
+        scroll.setPreferredSize(new Dimension(620, 600));
+        
+        add(scroll, BorderLayout.CENTER);
     }
 }
