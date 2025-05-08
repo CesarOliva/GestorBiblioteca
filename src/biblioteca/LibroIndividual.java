@@ -12,6 +12,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import Conexion.Peticiones;
 import Conexion.Sesion;
+import elementos.ButtonSounds;
 
 //"Librerias" personalizadas a importar
 import elementos.RoundedButton;
@@ -115,25 +116,30 @@ public class LibroIndividual extends JPanel{
         editar.setFont(new Font("Poppins", Font.PLAIN, 15));
         editar.setForeground(Color.white);
         editar.setBackground(new Color(100, 149, 237));
-        editar.setBounds(50, 460, 100, 30);       
+        editar.setBounds(50, 460, 100, 30);
+        editar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         eliminar = new RoundedButton("Eliminar"); 
         eliminar.setFont(new Font("Poppins", Font.PLAIN, 15));
         eliminar.setForeground(Color.white);
         eliminar.setBackground(Color.red);
-        eliminar.setBounds(180, 460, 100, 30);                
+        eliminar.setBounds(180, 460, 100, 30);       
+        eliminar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+       
         
         rentar = new RoundedButton("Rentar"); 
         rentar.setFont(new Font("Poppins", Font.PLAIN, 15));
         rentar.setForeground(Color.white);
         rentar.setBackground(new Color(100, 149, 237));
         rentar.setBounds(50, 460, 100, 30);
+        rentar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         devolver = new RoundedButton("Devolver"); 
         devolver.setFont(new Font("Poppins", Font.PLAIN, 15));
         devolver.setForeground(Color.white);
         devolver.setBackground(new Color(100, 149, 237));
         devolver.setBounds(50, 460, 100, 30);
+        devolver.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         if(Sesion.getTipo().equals("administrador")){
             editar.setVisible(true);
@@ -197,19 +203,28 @@ public class LibroIndividual extends JPanel{
         
         editar.addActionListener(e->{
             mostrarEditar();
+           
+    ButtonSounds.play("/sounds/ind.wav");
+
         });
         
         eliminar.addActionListener(e->{
             new ConfirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar el libro",
                 () -> Peticiones.eliminarLibro(IdLibro));
+                ButtonSounds.play("/sounds/ind.wav");
+
         });
         
         rentar.addActionListener(e->{
             Peticiones.PrestamoLibro(Sesion.getIdUsuario(), IdLibro, titulo); 
+                ButtonSounds.play("/sounds/ind.wav");
+
         });
         
         devolver.addActionListener(e->{
             Peticiones.devolverLibro(IdLibro);
+                ButtonSounds.play("/sounds/ind.wav");
+
         });
         
         panelEditar = new JPanel(null);
@@ -305,15 +320,19 @@ public class LibroIndividual extends JPanel{
         actualizar.setForeground(Color.white);
         actualizar.setBackground(new Color(100, 149, 237));
         actualizar.setBounds(50, 450, 100, 30);  
+        actualizar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JButton cancelar = new RoundedButton("Cancelar"); 
         cancelar.setFont(new Font("Poppins", Font.PLAIN, 14));
         cancelar.setForeground(Color.white);
         cancelar.setBackground(Color.red);
         cancelar.setBounds(180, 450, 100, 30);   
+        cancelar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         actualizar.addActionListener(e->{
             validarContenido();
+                ButtonSounds.play("/sounds/ind.wav");
+
         });
         
         cancelar.addActionListener(e->{
@@ -321,6 +340,8 @@ public class LibroIndividual extends JPanel{
             panelVista.setVisible(true);
             
             Peticiones.ObtenerLibroIndividual(IdLibro);
+                ButtonSounds.play("/sounds/ind.wav");
+
         });
         
         //Funcionalidad al clickear en la foto
@@ -328,6 +349,8 @@ public class LibroIndividual extends JPanel{
             @Override
             public void mouseClicked(MouseEvent e){
                 chooseFile();
+                    ButtonSounds.play("/sounds/ind.wav");
+
             }
         });
         

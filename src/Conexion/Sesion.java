@@ -17,7 +17,8 @@ public class Sesion {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement busquedaUsuario = conexion.prepareStatement("select Nombre, Usuario, Contraseña, FechaCreacion, Foto, TipoUsuario from usuarios where IdUsuario='"+idUsuario+"'");
+            PreparedStatement busquedaUsuario = conexion.prepareStatement("select Nombre, Usuario, "
+                + "Contraseña, FechaCreacion, Foto, TipoUsuario from usuarios where IdUsuario='"+idUsuario+"'");
             ResultSet consultaUsuario = busquedaUsuario.executeQuery();
 
             if (consultaUsuario.next()) {

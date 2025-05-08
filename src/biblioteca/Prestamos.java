@@ -12,6 +12,7 @@ import java.time.temporal.ChronoUnit;
 
 import Conexion.Peticiones;
 import Conexion.Sesion;
+import elementos.ButtonSounds;
 
 //"Librerias" necesarias a importar
 import elementos.CustomScroll;
@@ -156,6 +157,10 @@ public class Prestamos extends JPanel{
             verMas.setBackground(new Color(100, 149, 237));
             verMas.setFont(new Font("Poppins", Font.PLAIN, 14));
             verMas.setBounds(153, 180, 100, 30);
+            verMas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            verMas.addActionListener(e -> {
+    ButtonSounds.play("/sounds/BotonesMenu.wav");
+});
 
             int idLibro = libro.getIdLibro();
             verMas.addActionListener(e -> {

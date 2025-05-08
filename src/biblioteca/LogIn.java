@@ -18,6 +18,7 @@ import Conexion.Peticiones;
 import elementos.PlaceholderTextField;
 import elementos.PlaceholderPassField;
 import elementos.RoundedButton;
+import elementos.ButtonSounds;
 
 //Clase LogIn extendida de JFrame. Frame personalizado.
 public class LogIn extends JFrame {
@@ -183,6 +184,7 @@ public class LogIn extends JFrame {
             boton.setBackground(Color.WHITE);
             boton.setFont(new Font("Poppins", Font.PLAIN, 18));
             boton.setForeground(new Color(100, 149, 237));
+            boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
             JLabel imagen = new JLabel(new FlatSVGIcon("imagenes/login.svg", 150, 200));
 
@@ -190,6 +192,7 @@ public class LogIn extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent ae) {
                     event.actionPerformed(ae);
+                    ButtonSounds.play("/sounds/BotonesMenu.wav");
                 }
             });
 
@@ -329,6 +332,7 @@ public class LogIn extends JFrame {
             registrarseBtn.setBackground(new Color(100, 149, 237));
             registrarseBtn.setForeground(Color.WHITE);
             registrarseBtn.setFont(new Font("Poppins", Font.PLAIN, 18));
+            registrarseBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
             JLabel logo = new JLabel(new FlatSVGIcon("imagenes/logoLateral.svg", 168, 60));
             JLabel logo2 = new JLabel(new FlatSVGIcon("imagenes/logoLateral.svg", 168, 60));
@@ -358,6 +362,7 @@ public class LogIn extends JFrame {
             iniciarBtn.setBackground(new Color(100, 149, 237));
             iniciarBtn.setForeground(Color.WHITE);
             iniciarBtn.setFont(new Font("Poppins", Font.PLAIN, 18));    
+            iniciarBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             
             resetPlaceholder(txtNombreR);
             resetPlaceholder(txtUserR);
@@ -403,6 +408,7 @@ public class LogIn extends JFrame {
                 if(txtNombreR.validarContenido() || encontrado) txtNombreR.setForeground(Color.red);
                 if(txtUserR.validarContenido() || user.contains(" ")) txtUserR.setForeground(Color.red);
                 if(pass.isEmpty()) txtPassR.setForeground(Color.red);
+                ButtonSounds.play("/sounds/Error.wav");                                                                
                 return false;
             }else{
                 //Agrega el usuario a la base de datos
@@ -419,6 +425,7 @@ public class LogIn extends JFrame {
             if(txtUserL.validarContenido() || pass.isEmpty()){
                 if(txtUserL.validarContenido()) txtUserL.setForeground(Color.red);
                 if(pass.isEmpty()) txtPassL.setForeground(Color.red);
+                ButtonSounds.play("/sounds/Error.wav");                                                
             }else{
                 //Valida que el usuario exista
                 Peticiones.validarUsuario(user, pass);
@@ -447,6 +454,7 @@ public class LogIn extends JFrame {
                 //valida la condición de la validación de registro
                 if(validarRegistro()){
                     if(!animator.isRunning()) {
+                        ButtonSounds.play("/sounds/BotonesMenu.wav");                
                         animator.start();
                     }
                 }

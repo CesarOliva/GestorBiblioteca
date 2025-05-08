@@ -9,11 +9,14 @@ import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDate;
 import Conexion.Peticiones;
+import static biblioteca.Menu.inicio;
 
 //"Librerias" necesarias a utilizar
 import elementos.PlaceholderTextField;
 import elementos.RoundedButton;
 import elementos.WindowError;
+import elementos.ButtonSounds;
+
 
 //Clase CRUD_Libro extendido de JPanel. Panel personalizado
 public class CRUD_Libro extends JPanel{
@@ -84,6 +87,11 @@ public class CRUD_Libro extends JPanel{
         listo.setForeground(Color.white);
         listo.setBackground(new Color(100, 149, 237));
         listo.setBounds(50, 450, 100, 30);
+        listo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        listo.addActionListener(e -> {
+    ButtonSounds.play("/sounds/crud.wav");
+    
+});
         
         Descripcion.addFocusListener(new FocusAdapter() {
             @Override

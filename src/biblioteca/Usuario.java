@@ -12,6 +12,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import Conexion.Sesion;
 import Conexion.Peticiones;
+import elementos.ButtonSounds;
 
 //"Librerias" necesarias a importar
 import elementos.RoundedButton;
@@ -86,12 +87,22 @@ public class Usuario extends JPanel {
         btnEditar.setForeground(Color.WHITE);
         btnEditar.setBackground(new Color(100, 149, 237));
         btnEditar.setBounds(70, 270, 95, 30);
+        btnEditar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnEditar.addActionListener(e -> {
+    ButtonSounds.play("/sounds/ultimo.wav");
+    
+});
 
         JButton btnEliminar = new RoundedButton("Eliminar");
         btnEliminar.setFont(new Font("Poppins", Font.PLAIN, 14));
         btnEliminar.setForeground(Color.WHITE);
         btnEliminar.setBackground(Color.red);
         btnEliminar.setBounds(175, 270, 95, 30);
+        btnEliminar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnEliminar.addActionListener(e -> {
+    ButtonSounds.play("/sounds/ultimo.wav");
+   
+});
         
         //Se agregan los elementos al panel de verUsuario
         verUsuario.add(fotoUsuario);
@@ -146,13 +157,20 @@ public class Usuario extends JPanel {
         btnGuardar.setBackground(new Color(100, 149, 237));
         btnGuardar.setForeground(Color.white);
         btnGuardar.setBounds(70, 270, 95, 30);
+        btnGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnGuardar.addActionListener(e -> {
+    ButtonSounds.play("/sounds/busqueda.wav");
+});
 
         JButton btnCancelar = new RoundedButton("Cancelar");
         btnCancelar.setFont(new Font("Poppins", Font.PLAIN, 14));
         btnCancelar.setBackground(Color.red);
         btnCancelar.setForeground(Color.white);
         btnCancelar.setBounds(174, 270, 96, 30);
-
+        btnCancelar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+btnCancelar.addActionListener(e -> {
+    ButtonSounds.play("/sounds/busqueda.wav");
+});
         //Se agregan los elementos al panel de editarUsuario
         editarUsuario.add(fotoUsuario);
         editarUsuario.add(nombreEdit);
@@ -189,6 +207,8 @@ public class Usuario extends JPanel {
             verUsuario.setVisible(false);
             notificaciones.setVisible(false);
             editarUsuario.setVisible(true);
+            ButtonSounds.play("/sounds/autor.wav");            
+
         });
 
         btnCancelar.addActionListener(e -> {
@@ -198,10 +218,12 @@ public class Usuario extends JPanel {
             verUsuario.setVisible(true);
             notificaciones.setVisible(true);
             editarUsuario.setVisible(false);
+             ButtonSounds.play("/sounds/autor.wav");
         });
 
         btnGuardar.addActionListener(e -> {
             validarDatosUsuario();
+             ButtonSounds.play("/sounds/ind.wav");
         });
 
         btnEliminar.addActionListener(e -> {
@@ -211,6 +233,7 @@ public class Usuario extends JPanel {
             }else{
                 new ConfirmationWindow("Esta acción es permanente. Escribe tu contraseña para eliminar la cuenta",
                     () -> Peticiones.eliminarUsuario(Sesion.getUsuario()));
+                 ButtonSounds.play("/sounds/ind.wav");
             }
         });
         
@@ -326,6 +349,7 @@ public class Usuario extends JPanel {
                 Image imagen = new ImageIcon(destinoPath).getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
                 fotoUsuario.setIcon(new ImageIcon(imagen));
                 fotoUsuario.setBounds(50, 55, 200, 200);
+                fotoUsuario.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 
                 repaint();                
             } catch (Exception error) {

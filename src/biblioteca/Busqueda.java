@@ -7,6 +7,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import java.util.ArrayList;
 import Conexion.Peticiones;
+import static biblioteca.Menu.inicio;
+import elementos.ButtonSounds;
 import java.io.File;
 
 //"Libererias" personalizadas a importar
@@ -152,10 +154,13 @@ public class Busqueda extends JPanel{
             verMas.setBackground(new Color(100, 149, 237));
             verMas.setFont(new Font("Poppins", Font.PLAIN, 14));
             verMas.setBounds(153, 180, 100, 30);
+            verMas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            
 
             int idLibro = libro.getId();
             verMas.addActionListener(e -> {
                 Peticiones.ObtenerLibroIndividual(idLibro);
+                 ButtonSounds.play("/sounds/busqueda.wav");
             });
             
             Autor.addMouseListener(new MouseAdapter(){
@@ -199,9 +204,11 @@ public class Busqueda extends JPanel{
         anterior.setBackground(new Color(100, 149, 237));
         anterior.setFont(new Font("Poppins", Font.PLAIN, 12));
         anterior.setBounds(65, 0, 100, 40);
+        anterior.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         if(offset>0){
             anterior.addActionListener(e->{
+                ButtonSounds.play("/sounds/CambioDePagina.wav");                                            
                 //Posición de busqueda de libro
                offset-=limite;
                if(offset<0){
@@ -217,8 +224,10 @@ public class Busqueda extends JPanel{
         siguiente.setBackground(new Color(100, 149, 237));
         siguiente.setFont(new Font("Poppins", Font.PLAIN, 12));
         siguiente.setBounds(465, 0, 100, 40);
+        siguiente.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         siguiente.addActionListener(e->{
+            ButtonSounds.play("/sounds/CambioDePagina.wav");            
             //Posición de busqueda de libro
             offset+=limite;
             mostrarLibros(Peticiones.obtenerLibrosRecientes(limite, offset));

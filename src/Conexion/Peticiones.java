@@ -6,12 +6,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.io.*;
 import java.nio.file.*;
-
 import biblioteca.*;
 
 //"Librerias" personalizadas a importar
 import elementos.WindowMessage;
 import elementos.WindowError;
+import elementos.ButtonSounds;
 
 //Clase que realiza las peticiones a la base de datos
 public class Peticiones {
@@ -21,8 +21,6 @@ public class Peticiones {
     private static LocalDate fecha = LocalDate.now();
     
     private static int IdUsuarioActivo;
-    
-    
     
     //METODOS DE USUARIO
     
@@ -38,11 +36,13 @@ public class Peticiones {
             
             //Si encuentra usuario
             if(consultaUsers.next()){
+                ButtonSounds.play("/sounds/Error.wav");                                                
                 new WindowError("Usuario ya registrado. Intente con otro");
                 return false;
             }else{
                 //Insertar elementos a la base de datos de socios}
-                PreparedStatement insertarUsuario = conexion.prepareStatement("insert into usuarios values(?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement insertarUsuario = conexion.prepareStatement("insert into usuarios values(?,?,?,?,?,?,?)", 
+                    Statement.RETURN_GENERATED_KEYS);
 
                 //Pasa los valores
                 insertarUsuario.setInt(1, 0);
@@ -96,7 +96,8 @@ public class Peticiones {
                 new WindowMessage("Usuario Agregado Exitosamente");
                 
                 //Crea una notificacion.
-                PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje) values (?,?)");
+                PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones "
+                        + "(IdUsuario, Mensaje) values (?,?)");
                 
                 //Pasa los valores
                 insertarNotificacion.setInt(1, IdUsuario);
@@ -126,24 +127,28 @@ public class Peticiones {
     
     //Valida si el usuario ya existe en la base de datos
     public static void validarUsuario(String usuario, String contraseña){
+        
         try{
             //Inicia la conexion
             Connection conexion = conectar.conectar();
         
             //Busca si ya existe el usuario
-            PreparedStatement busquedaUsuarios = conexion.prepareStatement("select * from usuarios where Usuario='"+usuario+"' and Contraseña='"+contraseña+"'");
+            PreparedStatement busquedaUsuarios = conexion.prepareStatement("select * from usuarios where "
+                + "Usuario='"+usuario+"' and Contraseña='"+contraseña+"'");
             ResultSet consultaUsuarios = busquedaUsuarios.executeQuery();
             
             //Si existe
             if(consultaUsuarios.next()){
-                PreparedStatement tipoUsuario = conexion.prepareStatement("select tipoUsuario from usuarios where Usuario='"+usuario+"'"); 
+                PreparedStatement tipoUsuario = conexion.prepareStatement("select tipoUsuario from usuarios "
+                    + "where Usuario='"+usuario+"'"); 
                 ResultSet consultaTipos = tipoUsuario.executeQuery();
                 
                 if(consultaTipos.next()){
                     String tipo = consultaTipos.getString("TipoUsuario");
                     
                     //Guarda los datos de sesión
-                    PreparedStatement busqueda = conexion.prepareStatement("select IdUsuario from usuarios where Usuario='"+usuario+"'");
+                    PreparedStatement busqueda = conexion.prepareStatement("select IdUsuario from usuarios where "
+                        + "Usuario='"+usuario+"'");
 
                     ResultSet resultado = busqueda.executeQuery();
 
@@ -157,12 +162,14 @@ public class Peticiones {
                     
                     //Abre la aplicación segun el tipo de usuario que es
                     new App(tipo);
+                    ButtonSounds.play("/sounds/InicioDeSesion.wav");                
                 }
                 
                 biblioteca.LogIn.Formulario.getInstancia().limpiarCampos();
                 biblioteca.LogIn.getInstancia().cerrar();
             }else{ //Si no encuentra el usuario o no coincide la contraseña
                 new WindowError("Usuario o contraseña incorrectos");
+                ButtonSounds.play("/sounds/Error.wav");                                
             }
             
             //Cierra la conexión a la base de datos
@@ -183,7 +190,8 @@ public class Peticiones {
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
-            PreparedStatement busquedaNoti = conexion.prepareStatement("select * from notificaciones where IdUsuario='"+IdUsuario+"' order by IdNotificacion desc");
+            PreparedStatement busquedaNoti = conexion.prepareStatement("select * from notificaciones where "
+                + "IdUsuario='"+IdUsuario+"' order by IdNotificacion desc");
             ResultSet consultaNoti = busquedaNoti.executeQuery();
             
             int id=0;
@@ -214,7 +222,8 @@ public class Peticiones {
             //Inicia la conexion
             Connection conexion = conectar.conectar();
             
-            PreparedStatement eliminarNoti = conexion.prepareStatement("delete from notificaciones where IdNotificacion='"+idNotificacion+"'");
+            PreparedStatement eliminarNoti = conexion.prepareStatement("delete from notificaciones where "
+                + "IdNotificacion='"+idNotificacion+"'");
 
             int filasAfectadas = eliminarNoti.executeUpdate();
 
@@ -241,7 +250,8 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement actualizarUsuario = conexion.prepareStatement("update usuarios set Nombre=?, Contraseña=? where Usuario=?");
+            PreparedStatement actualizarUsuario = conexion.prepareStatement("update usuarios set Nombre=?, "
+                + "Contraseña=? where Usuario=?");
             
             actualizarUsuario.setString(1, nombre);
             actualizarUsuario.setString(2, contraseña);
@@ -250,7 +260,8 @@ public class Peticiones {
             actualizarUsuario.executeUpdate();
             
             Sesion.iniciarSesion(IdUsuarioActivo);
-            App.cambiarVista(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getContraseña(), Sesion.getFechaCreacion(), Sesion.getFoto()), Menu.inicio);
+            App.cambiarVista(new Usuario(Sesion.getNombre(), Sesion.getUsuario(), Sesion.getContraseña(), 
+                Sesion.getFechaCreacion(), Sesion.getFoto()), Menu.inicio);
             
             new WindowMessage("Datos actualizados correctamente");
             
@@ -272,7 +283,8 @@ public class Peticiones {
             Connection conexion = conectar.conectar();
 
             //Verifica que no tenga adeudos
-            PreparedStatement verificarAdeudos = conexion.prepareStatement("select * from multas where IdSocio='"+Sesion.getIdUsuario()+"' and Pagado=0");
+            PreparedStatement verificarAdeudos = conexion.prepareStatement("select * from multas where "
+                + "IdSocio='"+Sesion.getIdUsuario()+"' and Pagado=0");
             ResultSet consultaAdeudos = verificarAdeudos.executeQuery();
             
             if(consultaAdeudos.next()){
@@ -280,7 +292,8 @@ public class Peticiones {
                 return adeudo;
             }
             
-            PreparedStatement consulta = conexion.prepareStatement("select count(*) from prestamos where IdSocio='"+IdUsuario+"' and Devuelto=0");
+            PreparedStatement consulta = conexion.prepareStatement("select count(*) from prestamos where "
+                + "IdSocio='"+IdUsuario+"' and Devuelto=0");
             ResultSet resultado = consulta.executeQuery();
         
             if (resultado.next()) {
@@ -304,10 +317,9 @@ public class Peticiones {
             //Inicia la conexion
             Connection conexion = conectar.conectar();
             
-            
-            
             //Elimina las notificaciones 
-            PreparedStatement eliminarNotificaciones = conexion.prepareStatement("delete from notificaciones where IdUsuario='"+Sesion.getIdUsuario()+"'");
+            PreparedStatement eliminarNotificaciones = conexion.prepareStatement("delete from notificaciones where "
+                + "IdUsuario='"+Sesion.getIdUsuario()+"'");
             eliminarNotificaciones.executeUpdate();
             
             //Elimina el usuario
@@ -362,7 +374,8 @@ public class Peticiones {
             if(consultaAutor.next()){ //Si lo encuentra en la tabla de autores
                 IdAutor = consultaAutor.getInt("IdAutor");
             }else{ //Si no existe en la tabla
-                PreparedStatement insertarAutor = conexion.prepareStatement("insert into autores values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS); //Crea un registro del autor
+                PreparedStatement insertarAutor = conexion.prepareStatement("insert into autores values (?,?,?,?)", 
+                    Statement.RETURN_GENERATED_KEYS); //Crea un registro del autor
                 
                 //Pasa los valores
                 insertarAutor.setString(1, "0");
@@ -373,7 +386,8 @@ public class Peticiones {
                 String ruta = "C:/xampp/htdocs/Imagenes/"+autor.replace(" ","")+".jpg";
                 File destino = new File(ruta);
 
-                Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), 
+                    StandardCopyOption.REPLACE_EXISTING);
                 
                 insertarAutor.setString(4, "C:/xampp/htdocs/Imagenes/"+autor.replace(" ","_")+".jpg");
                 
@@ -391,7 +405,8 @@ public class Peticiones {
             if(consultaGenero.next()){ //Si lo encuentra en la tabla de generos
                 IdGenero = consultaGenero.getInt("IdGenero");
             }else{ //Si no existe en la tabla
-                PreparedStatement insertarGenero = conexion.prepareStatement("insert into generos values (?,?)", Statement.RETURN_GENERATED_KEYS); //Crea un registro del genero
+                PreparedStatement insertarGenero = conexion.prepareStatement("insert into generos values (?,?)", 
+                    Statement.RETURN_GENERATED_KEYS); //Crea un registro del genero
                 
                 //Pasa los valores
                 insertarGenero.setString(1, "0");
@@ -411,7 +426,8 @@ public class Peticiones {
             if(consultaEditorial.next()){ //Si lo encuentra en la tabla de autores
                 IdEditorial = consultaEditorial.getInt("IdEditorial");
             }else{ //Si no existe en la tabla
-                PreparedStatement insertarEditorial = conexion.prepareStatement("insert into editoriales values (?,?,?,?)", Statement.RETURN_GENERATED_KEYS); //Crea un registro de editorial
+                PreparedStatement insertarEditorial = conexion.prepareStatement("insert into editoriales values (?,?,?,?)", 
+                    Statement.RETURN_GENERATED_KEYS); //Crea un registro de editorial
                 
                 //Pasa los valores
                 insertarEditorial.setString(1, "0");
@@ -422,7 +438,8 @@ public class Peticiones {
                 String ruta = "C:/xampp/htdocs/Imagenes/"+editorial.replace(" ","_")+".jpg";
                 File destino = new File(ruta);
 
-                Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(Peticiones.class.getResourceAsStream("/imagenes/Perfil.jpg"), destino.toPath(), 
+                    StandardCopyOption.REPLACE_EXISTING);
 
                 insertarEditorial.setString(4, "C:/xampp/htdocs/Imagenes/"+editorial.replace(" ","")+".jpg");
                 
@@ -435,7 +452,8 @@ public class Peticiones {
             }            
             
             //Inserta elementos a la base de datos de libros
-            PreparedStatement insertarLibro = conexion.prepareStatement("insert into libros values (?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement insertarLibro = conexion.prepareStatement("insert into libros values (?,?,?,?,?,?,?,?,?,?)", 
+                Statement.RETURN_GENERATED_KEYS);
             
             //Pasa los valores
             insertarLibro.setString(1, "0");
@@ -471,7 +489,8 @@ public class Peticiones {
             
                             
             //Crea una notificacion.
-            PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje) values (?,?)");
+            PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones "
+                + "(IdUsuario, Mensaje) values (?,?)");
 
             //Pasa los valores
             insertarNotificacion.setInt(1, IdUsuarioActivo);
@@ -851,7 +870,8 @@ public class Peticiones {
             //Inicia la conexion
             Connection conexion = conectar.conectar();
             
-            PreparedStatement busquedaDevolucion = conexion.prepareStatement("select FechaDevolucion from devoluciones where IdPrestamo='"+idPrestamo+"'");
+            PreparedStatement busquedaDevolucion = conexion.prepareStatement("select FechaDevolucion from devoluciones "
+                + "where IdPrestamo='"+idPrestamo+"'");
             ResultSet consultaDevolucion = busquedaDevolucion.executeQuery();
             
             if(consultaDevolucion.next()){
@@ -878,7 +898,8 @@ public class Peticiones {
         try{
             Connection conexion = conectar.conectar();
          
-            PreparedStatement libroRentado = conexion.prepareStatement("select * from prestamos where IdSocio = ? and IdLibro = ? and Devuelto=0");
+            PreparedStatement libroRentado = conexion.prepareStatement("select * from prestamos where IdSocio = ? "
+                + "and IdLibro = ? and Devuelto=0");
             libroRentado.setInt(1, idUsuario);
             libroRentado.setInt(2, idLibro);
          
@@ -915,11 +936,13 @@ public class Peticiones {
                     int IdPrestamo = consultaPrestamo.getInt("IdPrestamo");
                     int IdSocio = consultaPrestamo.getInt("IdSocio");
 
-                    PreparedStatement busquedaMulta = conexion.prepareStatement("select * from multas where IdSocio='"+IdSocio+"' and IdPrestamo='"+IdPrestamo+"'");
+                    PreparedStatement busquedaMulta = conexion.prepareStatement("select * from multas where IdSocio='"+IdSocio+"' "
+                        + "and IdPrestamo='"+IdPrestamo+"'");
                     ResultSet consultaMulta = busquedaMulta.executeQuery();
                     
                     if(!consultaMulta.next()){
-                        PreparedStatement insertarMulta = conexion.prepareStatement("insert into multas (IdSocio, IdPrestamo, Monto, Pagado) values (?,?,?,?)");
+                        PreparedStatement insertarMulta = conexion.prepareStatement("insert into multas "
+                            + "(IdSocio, IdPrestamo, Monto, Pagado) values (?,?,?,?)");
 
                         insertarMulta.setInt(1, IdSocio);
                         insertarMulta.setInt(2, IdPrestamo);
@@ -928,7 +951,8 @@ public class Peticiones {
 
                         insertarMulta.executeUpdate();
 
-                        PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones (IdUsuario, Mensaje) values (?,?)");
+                        PreparedStatement insertarNotificacion = conexion.prepareStatement("insert into notificaciones "
+                            + "(IdUsuario, Mensaje) values (?,?)");
 
                         insertarNotificacion.setInt(1, IdSocio);
                         insertarNotificacion.setString(2, "Se ha generado una multa a tu cuenta");
@@ -982,7 +1006,8 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
 
-            PreparedStatement librosAutor = conexion.prepareStatement("select * from libros where IdAutor='"+idAutor+"' order by IdLibro desc limit ? offset ?");
+            PreparedStatement librosAutor = conexion.prepareStatement("select * from libros where IdAutor='"+idAutor+"' "
+                + "order by IdLibro desc limit ? offset ?");
             librosAutor.setInt(1, limite);
             librosAutor.setInt(2, offset);
             ResultSet consultaLibro = librosAutor.executeQuery();
@@ -1012,7 +1037,8 @@ public class Peticiones {
             Connection conexion = conectar.conectar();
             
             //Cuenta los elementos de la tabla de libros
-            PreparedStatement busquedaLibros = conexion.prepareStatement("select count(*) as Total from libros where IdAutor='"+IdAutor+"'");
+            PreparedStatement busquedaLibros = conexion.prepareStatement("select count(*) as Total from libros "
+                + "where IdAutor='"+IdAutor+"'");
             ResultSet consultaLibros = busquedaLibros.executeQuery();
             if (consultaLibros.next()) {
                 total = consultaLibros.getInt("Total");
@@ -1036,7 +1062,8 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement busquedaEditorial = conexion.prepareStatement("select * from editoriales where Editorial='"+editorial+"'");
+            PreparedStatement busquedaEditorial = conexion.prepareStatement("select * from editoriales where "
+                + "Editorial='"+editorial+"'");
             ResultSet consultaEditorial = busquedaEditorial.executeQuery();
             
             if(consultaEditorial.next()){
@@ -1064,7 +1091,8 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
 
-            PreparedStatement librosEditorial = conexion.prepareStatement("select * from libros where IdEditorial='"+idEditorial+"' order by IdLibro desc limit ? offset ?");
+            PreparedStatement librosEditorial = conexion.prepareStatement("select * from libros where "
+                + "IdEditorial='"+idEditorial+"' order by IdLibro desc limit ? offset ?");
             librosEditorial.setInt(1, limite);
             librosEditorial.setInt(2, offset);
             
@@ -1077,7 +1105,8 @@ public class Peticiones {
                 int IdAutor = consultaLibro.getInt("IdAutor"); 
                 String descripcion = consultaLibro.getString("Descripcion"); 
                 
-                PreparedStatement busquedaAutor = conexion.prepareStatement("select Nombre from autores where IdAutor='"+IdAutor+"'");
+                PreparedStatement busquedaAutor = conexion.prepareStatement("select Nombre from autores "
+                    + "where IdAutor='"+IdAutor+"'");
                 ResultSet consultaAutor = busquedaAutor.executeQuery();
                 
                 if(consultaAutor.next()){
@@ -1102,7 +1131,8 @@ public class Peticiones {
             Connection conexion = conectar.conectar();
             
             //Cuenta los elementos de la tabla de libros
-            PreparedStatement busquedaLibros = conexion.prepareStatement("select count(*) as Total from libros where IdEditorial='"+IdEditorial+"'");
+            PreparedStatement busquedaLibros = conexion.prepareStatement("select count(*) as Total "
+                + "from libros where IdEditorial='"+IdEditorial+"'");
             ResultSet consultaLibros = busquedaLibros.executeQuery();
             if (consultaLibros.next()) {
                 total = consultaLibros.getInt("Total");
@@ -1126,7 +1156,8 @@ public class Peticiones {
             Connection conexion = conectar.conectar();
             
             PreparedStatement eliminarLibro = conexion.prepareStatement("delete from libros where IdLibro='"+idLibro+"'");
-            PreparedStatement eliminarLibroAdministrador = conexion.prepareStatement("delete from librosadministradores where IdLibro='"+idLibro+"'");
+            PreparedStatement eliminarLibroAdministrador = conexion.prepareStatement("delete from "
+                + "librosadministradores where IdLibro='"+idLibro+"'");
 
             int filasLA = eliminarLibroAdministrador.executeUpdate();
             int filasLibro = eliminarLibro.executeUpdate();
@@ -1155,7 +1186,8 @@ public class Peticiones {
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement actualizarEditorial = conexion.prepareStatement("update editoriales set Editorial=?, Descripcion=? where IdEditorial=?");
+            PreparedStatement actualizarEditorial = conexion.prepareStatement("update editoriales set Editorial=?, "
+                + "Descripcion=? where IdEditorial=?");
             
             actualizarEditorial.setString(1, editorial);
             actualizarEditorial.setString(2, descripcion);
@@ -1204,12 +1236,15 @@ public class Peticiones {
     
     
     //Actualizar libro
-    public static void actualizarLibro(int IdLibro, String isbn, String titulo, String autor, String portada, int año, String editorial, String genero, int paginas, String descripcion, String admin){
+    public static void actualizarLibro(int IdLibro, String isbn, String titulo, String autor, String portada, 
+        int año, String editorial, String genero, int paginas, String descripcion, String admin){
+        
         try{
             //Inicia la conexión
             Connection conexion = conectar.conectar();
             
-            PreparedStatement actualizarLibro = conexion.prepareStatement("update libros set ISBN=?, Titulo=?, Año=?, Paginas=?, Descripcion=? where idLibro=?");
+            PreparedStatement actualizarLibro = conexion.prepareStatement("update libros set ISBN=?, Titulo=?, "
+                + "Año=?, Paginas=?, Descripcion=? where idLibro=?");
             
             actualizarLibro.setString(1, isbn);
             actualizarLibro.setString(2, titulo);
@@ -1224,7 +1259,8 @@ public class Peticiones {
             String añoString = ""+año;
             String paginasString = ""+paginas;
             
-            App.cambiarVista(new LibroIndividual(IdLibro, isbn, titulo, autor, portada, añoString, editorial, genero, paginasString, descripcion, admin), null);
+            App.cambiarVista(new LibroIndividual(IdLibro, isbn, titulo, autor, portada, añoString, editorial, 
+                genero, paginasString, descripcion, admin), null);
             
             //Cierra la conexion
             conectar.cerrarConexion();            
@@ -1245,7 +1281,8 @@ public class Peticiones {
             Connection conexion = conectar.conectar();
         
             //Buscar en la tabla de usuarios los usuarios de tipo administrador
-            PreparedStatement busquedaAdmins = conexion.prepareStatement("select * from usuarios where TipoUsuario='administrador'");
+            PreparedStatement busquedaAdmins = conexion.prepareStatement("select * from usuarios where "
+                + "TipoUsuario='administrador'");
             ResultSet consultaAdmins = busquedaAdmins.executeQuery();
             
             //Guarda los administradores
@@ -1260,7 +1297,8 @@ public class Peticiones {
             
             //hacer la busqueda por cada uno de los administradores
             for(int IdAdmin : administradores){
-                PreparedStatement cuentaAdmin = conexion.prepareStatement("select count(*) from librosadministradores where IdAdmin='"+IdAdmin+"'");
+                PreparedStatement cuentaAdmin = conexion.prepareStatement("select count(*) from librosadministradores "
+                    + "where IdAdmin='"+IdAdmin+"'");
                 ResultSet consultaCuenta = cuentaAdmin.executeQuery();
                 
                 if(consultaCuenta.next()){
@@ -1268,7 +1306,8 @@ public class Peticiones {
                     
                     //los que tengan una cuenta > 0, agregarlos a una clase librosAdministradores que tenga la cantidad y el nombre
                     if(cantidad > 0){
-                        PreparedStatement obtenerAdmin = conexion.prepareStatement("select Usuario from usuarios where IdUsuario='"+IdAdmin+"'");
+                        PreparedStatement obtenerAdmin = conexion.prepareStatement("select Usuario from usuarios where "
+                            + "IdUsuario='"+IdAdmin+"'");
                         ResultSet consultaObtener = obtenerAdmin.executeQuery();         
                         
                         if(consultaObtener.next()){
@@ -1301,8 +1340,10 @@ public class Peticiones {
             //Inicia la conexion
             Connection conexion = conectar.conectar();
 
-            PreparedStatement busquedaGenero = conexion.prepareStatement("select g.Genero, count(*) as Cantidad from prestamos p join libros l "
-                    + "on p.IdLibro = l.IdLibro join generos g on l.IdGenero = g.IdGenero group by g.Genero order by Cantidad desc");
+            PreparedStatement busquedaGenero = conexion.prepareStatement("select g.Genero, count(*) "
+                + "as Cantidad from prestamos p join libros l "
+                + "on p.IdLibro = l.IdLibro join generos g on l.IdGenero = g.IdGenero "
+                + "group by g.Genero order by Cantidad desc");
             ResultSet consultaGenero = busquedaGenero.executeQuery();
 
             // Recorre el resultado

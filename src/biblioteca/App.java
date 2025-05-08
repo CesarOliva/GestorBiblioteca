@@ -4,6 +4,7 @@ package biblioteca;
 import javax.swing.*;
 import java.awt.*;
 import Conexion.Sesion;
+import elementos.ButtonSounds;
 
 //Clase App heredada de un JFrame. Frame personalizado
 public class App extends JFrame{
@@ -47,12 +48,14 @@ public class App extends JFrame{
         if (botonActivo != null) { 
             botonActivo.setBackground(Color.WHITE);
             botonActivo.setForeground(new Color(100, 149, 237));
+            botonActivo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
         
         //Cambiar el diseño al nuevo botón seleccionado
         if(boton!=null){
             boton.setBackground(new Color(100, 149, 237));
             boton.setForeground(Color.WHITE);
+            boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
         
         botonActivo = boton;
@@ -70,6 +73,7 @@ public class App extends JFrame{
     }
     
     public void cerrar(){
+        ButtonSounds.play("/sounds/CerrarSesion.wav");
         dispose();
         Sesion.cerrarSesion();
     }

@@ -11,6 +11,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import Conexion.Peticiones;
 import Conexion.Sesion;
+import static biblioteca.Menu.inicio;
+import elementos.ButtonSounds;
 
 //"Librerias" necesarias a importar
 import elementos.RoundedButton;
@@ -78,6 +80,7 @@ public class Editorial extends JPanel {
         editar.setForeground(Color.WHITE);
         editar.setBackground(new Color(100, 149, 237));
         editar.setBounds(100, 260, 100, 30);
+        editar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         //Se muestre un botón si es administrador
         if(Sesion.getTipo().equals("administrador")){
@@ -87,6 +90,9 @@ public class Editorial extends JPanel {
         }
         
         editar.addActionListener(e->{
+            
+    ButtonSounds.play("/sounds/crud.wav");
+
             mostrarPanelEditar(idEditorial, editorial, descripcion, foto);
         });
 
@@ -164,14 +170,20 @@ public class Editorial extends JPanel {
         actualizar.setForeground(Color.WHITE);
         actualizar.setBackground(new Color(100, 149, 237));
         actualizar.setBounds(30, 260, 120, 30);
+        actualizar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+       
         
         JButton cancelar = new RoundedButton("Cancelar");
         cancelar.setFont(new Font("Poppins", Font.PLAIN, 15));
         cancelar.setForeground(Color.WHITE);
         cancelar.setBackground(Color.red);
         cancelar.setBounds(170, 260, 100, 30);
+        cancelar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         cancelar.addActionListener(e->{
+            
+    ButtonSounds.play("/sounds/crud.wav");
+  
             Nombre.setText(editorial);
             txtDesc.setText(descripcion);
             
@@ -183,6 +195,7 @@ public class Editorial extends JPanel {
             String nombre = Nombre.getText();
             String desc = txtDesc.getText();
             Peticiones.actualizarEditorial(IdEditorial, nombre, desc, foto);
+            ButtonSounds.play("/sounds/crud.wav");
         });
         
         panelEditar.add(fotoEditorial);
@@ -250,6 +263,11 @@ public class Editorial extends JPanel {
             verMas.setBackground(new Color(100, 149, 237));
             verMas.setFont(new Font("Poppins", Font.PLAIN, 14));
             verMas.setBounds(153, 180, 100, 30);
+            verMas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            verMas.addActionListener(e -> {
+    ButtonSounds.play("/sounds/crud.wav");
+   
+});
 
             int idLibro = libro.getId();
             verMas.addActionListener(e -> {
@@ -298,9 +316,11 @@ public class Editorial extends JPanel {
         anterior.setBackground(new Color(100, 149, 237));
         anterior.setFont(new Font("Poppins", Font.PLAIN, 12));
         anterior.setBounds(65, 0, 100, 40);
+        anterior.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         if(offset>0){
             anterior.addActionListener(e->{
+                ButtonSounds.play("/sounds/CambioDePagina.wav");                            
                 //Posición de busqueda de libro
                offset-=limite;
                if(offset<0){
@@ -316,8 +336,10 @@ public class Editorial extends JPanel {
         siguiente.setBackground(new Color(100, 149, 237));
         siguiente.setFont(new Font("Poppins", Font.PLAIN, 12));
         siguiente.setBounds(465, 0, 100, 40);
+        siguiente.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         siguiente.addActionListener(e->{
+            ButtonSounds.play("/sounds/CambioDePagina.wav");                                        
             //Posición de busqueda de libro
             offset+=limite;
             cargarLibros(Peticiones.librosEditorial(idEditorial, limite, offset));
