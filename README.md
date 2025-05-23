@@ -22,4 +22,4 @@ Gestor de Bilbioteca en el que puedes:
 
 ## Build
 
-Hecho unicamente con java conectado a una base de datos SQL.
+Hecho unicamente con java conectado a una base de datos SQL. (04/2025)
